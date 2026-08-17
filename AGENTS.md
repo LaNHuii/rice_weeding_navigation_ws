@@ -48,3 +48,10 @@
 - 覆盖路径执行、除草机构控制和实车速度输出。
 - 水体流体动力学、泥土有限元或高保真植株接触仿真。
 - 复制 FAST-LIVO2、Nav2、OpenNav、Fields2Cover 或其他第三方源码。
+
+## Phase 2 current gate
+
+- Phase 1 的文档、启动入口和验收证据必须保留，Phase 2 使用独立入口迭代。
+- 当前只允许在 Gazebo 中生成机器人实体，初始位姿从 environment profile 消费。
+- 当前不启用差速驱动、`/cmd_vel`、`odom -> base_footprint` 或 `map -> odom`。
+- 仿真真值定位、速度链、安全门禁与停止测试必须各自通过后才能解锁运动。

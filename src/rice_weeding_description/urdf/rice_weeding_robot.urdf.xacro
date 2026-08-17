@@ -16,13 +16,13 @@
   <xacro:property name="body_center_z_value" value="${float(xacro.arg('body_center_z'))}"/>
   <xacro:property name="mast_length_value" value="${float(xacro.arg('sensor_height')) - float(xacro.arg('body_center_z'))}"/>
 
-  <material name="paddy_green"><color rgba="0.10 0.38 0.16 1.0"/></material>
+  <material name="body_black"><color rgba="0.03 0.03 0.03 1.0"/></material>
   <material name="sensor_black"><color rgba="0.04 0.05 0.04 1.0"/></material>
   <material name="cage_wheel_gray"><color rgba="0.22 0.24 0.22 1.0"/></material>
   <link name="base_footprint"/>
   <link name="base_link">
     <inertial><mass value="$(arg mass)"/><origin xyz="0 0 0"/><inertia ixx="3.0" ixy="0" ixz="0" iyy="3.0" iyz="0" izz="5.0"/></inertial>
-    <visual><geometry><box size="$(arg body_length) $(arg body_width) $(arg body_height)"/></geometry><material name="paddy_green"/></visual>
+    <visual><geometry><box size="$(arg body_length) $(arg body_width) $(arg body_height)"/></geometry><material name="body_black"/></visual>
     <collision><geometry><box size="$(arg body_length) $(arg body_width) $(arg body_height)"/></geometry></collision>
   </link>
   <joint name="base_footprint_to_base_link" type="fixed">
@@ -33,6 +33,7 @@
   <xacro:macro name="cage_wheel" params="name x y">
     <link name="${name}_link">
       <visual><origin rpy="1.57079632679 0 0"/><geometry><cylinder radius="${wheel_radius_value}" length="$(arg wheel_width)"/></geometry><material name="cage_wheel_gray"/></visual>
+      <collision><origin rpy="1.57079632679 0 0"/><geometry><cylinder radius="${wheel_radius_value}" length="$(arg wheel_width)"/></geometry></collision>
     </link>
     <joint name="base_link_to_${name}" type="fixed">
       <parent link="base_link"/><child link="${name}_link"/>

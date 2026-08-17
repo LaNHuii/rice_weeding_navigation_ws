@@ -63,3 +63,23 @@ ros2 launch rice_weeding_bringup phase1_simulation.launch.py
 
 该入口当前不允许运动，也不会发布实车速度。后续完成 Gazebo 差速驱动和 Nav2 真值闭环后，
 才会继续推进仿真底盘与 Nav2 真值闭环状态。
+
+## Phase 2（保留 Phase 1 归档后新增）
+
+Phase 2 不改写上述 Phase 1 入口和验收内容，使用新的组合启动文件。当前第一个
+门禁是把已有 Xacro/URDF 通过 `robot_description` 生成为 Gazebo 中的
+`rice_weeding_robot` 实体。
+
+```bash
+source /opt/ros/humble/setup.bash
+cd "$RICE_WEEDING_WS"
+source install/setup.bash
+ros2 launch rice_weeding_bringup phase2_simulation.launch.py
+```
+
+当前 Phase 2 仍强制 `motion_enabled=false`，不提供差速驱动、`/cmd_vel`、仿真里程计或
+真值 TF。机器人实体可见不等于 Nav2 闭环已完成。
+
+2026-08-17 动态验收中，`ros_gz_sim create` 返回 `OK creation of entity`，Gazebo
+实体树出现 `rice_weeding_robot`，且 ROS 图中仍无 `/cmd_vel`。因此“机器人实体生成”
+门禁已通过，下一门禁是仿真真值定位接口。

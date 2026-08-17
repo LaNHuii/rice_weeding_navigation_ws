@@ -22,6 +22,8 @@ colcon build --symlink-install
 - ROS 节点仅包含时钟桥和机器人状态发布者，话题中无 `/cmd_vel`。
 - 在独立 Gazebo transport 分区中截图确认 `crop_field` 新场景生效：12,936 株绿色
   作物覆盖全部内区，田埂为单一连续矩形外框，泥面和浅水无越界。
+- Phase 2 入口返回 `OK creation of entity`，Gazebo 实体树和截图均确认
+  `rice_weeding_robot` 存在；ROS 话题中仍无 `/cmd_vel`。
 
 后续动态门禁：
 

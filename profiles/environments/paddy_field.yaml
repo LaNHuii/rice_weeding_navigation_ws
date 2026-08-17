@@ -4,6 +4,12 @@ environment:
   status: provisional_simulation_only
   frame_id: map
   axes: ros_right_handed_enu
+  simulation_spawn_pose:
+    verified: false
+    simulation_only: true
+    x: 0.0
+    y: 0.0
+    yaw: 0.0
   field:
     simulation_only: true
     boundary_outer_length: 20.0
@@ -45,6 +51,7 @@ environment:
   terrain:
     simulation_only: true
     model: planar_mud_with_slip_perturbation
+    surface_elevation: 0.05
   semantic_classes:
     crops_are_navigation_obstacles: false
     weeds_are_navigation_obstacles: false

@@ -154,3 +154,21 @@ def test_architecture_changes_have_required_documents():
         "docs/migration/migration_matrix.md",
     ]
     assert all((ROOT / item).is_file() for item in required)
+
+
+def test_phase2_spawn_gate_is_separate_and_fail_closed():
+    phase1 = (ROOT / "src/rice_weeding_bringup/launch/phase1_simulation.launch.py").read_text()
+    phase2 = (ROOT / "src/rice_weeding_bringup/launch/phase2_simulation.launch.py").read_text()
+    assert "ros_gz_sim" not in phase1
+    assert 'executable="create"' in phase2
+    assert '"-topic", "robot_description"' in phase2
+    assert 'DeclareLaunchArgument("motion_enabled", default_value="false")' in phase2
+    assert "Phase 2 entity-spawn gate is motion-disabled" in phase2
+
+
+def test_phase2_spawn_pose_is_explicitly_simulation_only():
+    environment = load_yaml("profiles/environments/paddy_field.yaml")["environment"]
+    pose = environment["simulation_spawn_pose"]
+    assert pose["verified"] is False
+    assert pose["simulation_only"] is True
+    assert environment["terrain"]["surface_elevation"] == 0.05

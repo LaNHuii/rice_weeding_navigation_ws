@@ -63,3 +63,18 @@ robot_state_publisher ----------+---- base_link -> sensors
 - Phase 4：稻行视觉偏差与作物/障碍语义分层。
 - Phase 5：覆盖规划、地头掉头、路径验证和仿真执行。
 - Phase 6：杂草检测坐标变换与除草触发接口。
+
+## Phase 2 当前门禁
+
+Phase 2 使用 `phase2_simulation.launch.py` 作为独立入口。它复用 Phase 1 稻田世界和
+`robot_description`，延时调用 `ros_gz_sim create` 生成 `rice_weeding_robot` 实体。
+
+```text
+paddy_field.sdf + robot_description
+                 |
+                 v
+          rice_weeding_robot (Gazebo entity)
+```
+
+该门禁只验证安装态机器人可生成，不声称底盘运动或 Nav2 闭环已完成。
+当前场景无 headland，所以 `motion_enabled` 仍必须为 `false`。
