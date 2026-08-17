@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot name="rice_weeding_prototype" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="body_length" default="0.0"/>
+  <xacro:arg name="body_width" default="0.0"/>
+  <xacro:arg name="body_height" default="0.0"/>
+  <xacro:arg name="body_center_z" default="0.0"/>
+  <xacro:arg name="mass" default="0.0"/>
+  <xacro:arg name="wheel_diameter" default="0.0"/>
+  <xacro:arg name="wheel_width" default="0.0"/>
+  <xacro:arg name="track_width" default="0.0"/>
+  <xacro:arg name="wheelbase" default="0.0"/>
+  <xacro:arg name="sensor_height" default="0.0"/>
+  <xacro:arg name="gnss_baseline" default="0.0"/>
+
+  <xacro:property name="wheel_radius_value" value="${0.5 * float(xacro.arg('wheel_diameter'))}"/>
+  <xacro:property name="body_center_z_value" value="${float(xacro.arg('body_center_z'))}"/>
+  <xacro:property name="mast_length_value" value="${float(xacro.arg('sensor_height')) - float(xacro.arg('body_center_z'))}"/>
+
+  <material name="paddy_green"><color rgba="0.10 0.38 0.16 1.0"/></material>
+  <material name="sensor_black"><color rgba="0.04 0.05 0.04 1.0"/></material>
+  <material name="cage_wheel_gray"><color rgba="0.22 0.24 0.22 1.0"/></material>
+  <link name="base_footprint"/>
+  <link name="base_link">
+    <inertial><mass value="$(arg mass)"/><origin xyz="0 0 0"/><inertia ixx="3.0" ixy="0" ixz="0" iyy="3.0" iyz="0" izz="5.0"/></inertial>
+    <visual><geometry><box size="$(arg body_length) $(arg body_width) $(arg body_height)"/></geometry><material name="paddy_green"/></visual>
+    <collision><geometry><box size="$(arg body_length) $(arg body_width) $(arg body_height)"/></geometry></collision>
+  </link>
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint"/><child link="base_link"/>
+    <origin xyz="0 0 $(arg body_center_z)" rpy="0 0 0"/>
+  </joint>
+
+  <xacro:macro name="cage_wheel" params="name x y">
+    <link name="${name}_link">
+      <visual><origin rpy="1.57079632679 0 0"/><geometry><cylinder radius="${wheel_radius_value}" length="$(arg wheel_width)"/></geometry><material name="cage_wheel_gray"/></visual>
+    </link>
+    <joint name="base_link_to_${name}" type="fixed">
+      <parent link="base_link"/><child link="${name}_link"/>
+      <origin xyz="${x} ${y} ${-body_center_z_value + wheel_radius_value}"/>
+    </joint>
+  </xacro:macro>
+  <xacro:cage_wheel name="front_left_wheel" x="${0.5 * float(xacro.arg('wheelbase'))}" y="${0.5 * float(xacro.arg('track_width'))}"/>
+  <xacro:cage_wheel name="rear_left_wheel" x="${-0.5 * float(xacro.arg('wheelbase'))}" y="${0.5 * float(xacro.arg('track_width'))}"/>
+  <xacro:cage_wheel name="front_right_wheel" x="${0.5 * float(xacro.arg('wheelbase'))}" y="${-0.5 * float(xacro.arg('track_width'))}"/>
+  <xacro:cage_wheel name="rear_right_wheel" x="${-0.5 * float(xacro.arg('wheelbase'))}" y="${-0.5 * float(xacro.arg('track_width'))}"/>
+
+  <link name="sensor_mast_link"><visual><origin xyz="0 0 ${0.5 * mast_length_value}"/><geometry><cylinder radius="0.015" length="${mast_length_value}"/></geometry><material name="sensor_black"/></visual></link>
+  <joint name="base_link_to_sensor_mast" type="fixed"><parent link="base_link"/><child link="sensor_mast_link"/><origin xyz="0 0 0"/></joint>
+  <link name="lidar_link"/>
+  <joint name="base_link_to_lidar_link" type="fixed"><parent link="base_link"/><child link="lidar_link"/><origin xyz="0 0 ${mast_length_value}"/></joint>
+  <link name="imu_link"/>
+  <joint name="base_link_to_imu_link" type="fixed"><parent link="base_link"/><child link="imu_link"/><origin xyz="0 0 0"/></joint>
+  <link name="gnss_left_link"/>
+  <joint name="base_link_to_gnss_left_link" type="fixed"><parent link="base_link"/><child link="gnss_left_link"/><origin xyz="0 ${0.5 * float(xacro.arg('gnss_baseline'))} ${mast_length_value}"/></joint>
+  <link name="gnss_right_link"/>
+  <joint name="base_link_to_gnss_right_link" type="fixed"><parent link="base_link"/><child link="gnss_right_link"/><origin xyz="0 ${-0.5 * float(xacro.arg('gnss_baseline'))} ${mast_length_value}"/></joint>
+  <link name="front_camera_link"/>
+  <joint name="base_link_to_front_camera_link" type="fixed"><parent link="base_link"/><child link="front_camera_link"/><origin xyz="0.49 0 0" rpy="0 0.35 0"/></joint>
+  <link name="downward_camera_link"/>
+  <joint name="base_link_to_downward_camera_link" type="fixed"><parent link="base_link"/><child link="downward_camera_link"/><origin xyz="0.30 0 ${-0.5 * float(xacro.arg('body_height'))}" rpy="0 1.20 0"/></joint>
+</robot>

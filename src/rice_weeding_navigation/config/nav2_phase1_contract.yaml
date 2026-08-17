@@ -1,0 +1,13 @@
+schema_version: 1.0
+status: interface_stub
+frames: {global: map, odom: odom, robot_base: base_footprint}
+topics:
+  odometry: /rice_weeding/localization/odometry
+  command_raw: /rice_weeding/navigation/cmd_vel_raw
+  command_safe: /rice_weeding/safety/cmd_vel
+  obstacle_cloud: /rice_weeding/perception/obstacle_cloud
+geometry:
+  source_package: rice_weeding_description
+  source_profile: profiles/platforms/rice_weeding_prototype.yaml
+crop_policy: {crops_are_obstacles: false, in_crop_in_place_rotation_allowed: false}
+motion: {enabled: false}

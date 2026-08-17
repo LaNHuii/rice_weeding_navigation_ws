@@ -1,0 +1,74 @@
+schema_version: 1.0
+platform:
+  name: rice_weeding_prototype
+  status: provisional_simulation_only
+  kinematics: four_cage_wheel_differential
+  frames:
+    footprint: base_footprint
+    base: base_link
+  geometry:
+    source: user_confirmed_2026-08-17
+    outer_dimensions:
+      verified: true
+      length: 1.0
+      width: 1.0
+      height_from_ground: 0.30
+    body_clearance:
+      verified: false
+      simulation_only: true
+      nominal: 0.16
+      minimum_loaded: 0.10
+    footprint:
+      - [0.50, 0.50]
+      - [0.50, -0.50]
+      - [-0.50, -0.50]
+      - [-0.50, 0.50]
+    navigation_margin:
+      verified: false
+      simulation_only: true
+      value: 0.02
+    navigation_footprint:
+      - [0.52, 0.52]
+      - [0.52, -0.52]
+      - [-0.52, -0.52]
+      - [-0.52, 0.52]
+  mass:
+    verified: false
+    simulation_only: true
+    value: 45.0
+  drive:
+    verified: false
+    simulation_only: true
+    wheel_type: narrow_paddy_cage_wheel
+    wheel_count: 4
+    wheel_diameter: 0.29
+    wheel_width: 0.06
+    track_width: 0.75
+    wheelbase: 0.675
+    in_crop_in_place_rotation_allowed: false
+  limits:
+    simulation_only: true
+    work_velocity: 0.12
+    max_forward_velocity: 0.25
+    max_reverse_velocity: 0.10
+    max_angular_velocity: 0.35
+    max_linear_acceleration: 0.20
+    max_linear_deceleration: 0.40
+  coverage:
+    simulation_only: true
+    operation_width: 0.75
+    required_headland_width: 2.50
+  row_tracking:
+    simulation_only: true
+    nominal_cross_track_limit: 0.02
+    slowdown_cross_track_error: 0.04
+    stop_cross_track_error: 0.06
+  sensors:
+    operational_sensor_height:
+      verified: false
+      simulation_only: true
+      value: 0.65
+    dual_gnss_baseline:
+      verified: false
+      simulation_only: true
+      value: 0.70

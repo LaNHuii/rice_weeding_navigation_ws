@@ -1,0 +1,4 @@
+# rice_weeding_navigation
+
+Nav2接口边界包。Phase 1不启动controller，也不包含可执行路径；配置文件只冻结frame、topic、
+footprint来源和作物区禁原地转向合同。完整Nav2参数在仿真运动模型与安全速度链完成后加入。

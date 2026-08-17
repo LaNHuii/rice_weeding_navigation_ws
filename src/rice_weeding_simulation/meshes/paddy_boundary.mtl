@@ -1,0 +1,8 @@
+# Generated from profiles/environments/paddy_field.yaml
+newmtl bund_brown
+Ka 0.38 0.27 0.12
+Kd 0.38 0.27 0.12
+Ks 0.03 0.03 0.03
+Ns 4.0
+d 1.0
+illum 2

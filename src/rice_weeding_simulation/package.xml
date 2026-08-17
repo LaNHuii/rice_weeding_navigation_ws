@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>rice_weeding_simulation</name><version>0.1.0</version>
+  <description>Gazebo Sim paddy-field scene and simulation interface skeleton.</description>
+  <maintainer email="maintainer@example.com">rice_weeding_navigation maintainers</maintainer><license>Apache-2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>ament_index_python</exec_depend><exec_depend>launch</exec_depend><exec_depend>launch_ros</exec_depend>
+  <exec_depend>rice_weeding_description</exec_depend><exec_depend>ros_gz_bridge</exec_depend><exec_depend>ros_gz_sim</exec_depend>
+  <test_depend>ament_lint_auto</test_depend><test_depend>ament_lint_common</test_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

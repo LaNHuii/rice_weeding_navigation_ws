@@ -1,0 +1,58 @@
+schema_version: 1.0
+environment:
+  name: paddy_field
+  status: provisional_simulation_only
+  frame_id: map
+  axes: ros_right_handed_enu
+  field:
+    simulation_only: true
+    boundary_outer_length: 20.0
+    boundary_outer_width: 15.0
+    boundary_outer_area: 300.0
+    previous_boundary_outer_area: 600.0
+    bund:
+      verified: false
+      simulation_only: true
+      thickness: 0.15
+      height: 0.18
+      visual_topology: single_rectangular_frame
+      color_rgba: [0.38, 0.27, 0.12, 1.0]
+    headland_width: 0.0
+  crop_grid:
+    source: user_confirmed_2026-08-17
+    row_spacing: 0.15
+    plant_spacing: 0.15
+    row_direction_yaw: 0.0
+    position_jitter: 0.015
+    missing_plant_ratio: 0.03
+    collision_policy: visual_only
+    visual_model:
+      verified: false
+      simulation_only: true
+      footprint_length: 0.03
+      footprint_width: 0.03
+      height: 0.175
+      color_rgba: [0.05, 0.72, 0.08, 1.0]
+    full_inner_coverage:
+      simulation_only: true
+      enabled: true
+      motion_compatible: false
+  water:
+    simulation_only: true
+    minimum_depth: 0.05
+    maximum_depth: 0.10
+    fluid_dynamics_enabled: false
+  terrain:
+    simulation_only: true
+    model: planar_mud_with_slip_perturbation
+  semantic_classes:
+    crops_are_navigation_obstacles: false
+    weeds_are_navigation_obstacles: false
+    hard_obstacles:
+      - person
+      - rock
+      - farm_tool
+      - field_bund
+    negative_obstacles:
+      - ditch
+      - hole
