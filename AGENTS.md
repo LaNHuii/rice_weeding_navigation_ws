@@ -33,6 +33,7 @@
 - 导航 footprint 必须从 platform profile 消费，不得在 Nav2、覆盖规划或仿真中复制第二份。
 - `0.75 m` 轮距、`0.16 m` 净空、笼式轮尺寸与质量均为仿真假设，实车使用前必须测量。
 - 作物网格的 canonical 行距和株距均为 `0.15 m`。
+- `map` 原点为田块外边界左下（西南）角；x 沿外边界长度正向，y 沿外边界宽度正向，z 向上。
 - Gazebo 作物必须逐株表达，不得使用连续长条代替；单株仿真几何只从
   environment profile 消费。
 - 田埂可见几何必须是单一连续矩形外框，不得使用会在田块内相交的长条。
@@ -52,6 +53,8 @@
 ## Phase 2 current gate
 
 - Phase 1 的文档、启动入口和验收证据必须保留，Phase 2 使用独立入口迭代。
-- 当前只允许在 Gazebo 中生成机器人实体，初始位姿从 environment profile 消费。
-- 当前不启用差速驱动、`/cmd_vel`、`odom -> base_footprint` 或 `map -> odom`。
+- Gazebo 机器人实体生成门禁已通过，初始位姿从 environment profile 消费。
+- 仿真真值定位门禁已通过；当前仿真入口允许真值适配器唯一发布 `map -> odom` 和仿真真值话题，该适配器不得在实车入口启用。
+- `odom -> base_footprint` 和 `/rice_weeding/localization/odometry` 仍保留给下一门禁的仿真底盘里程计，真值适配器不得冒充其发布者。
+- 当前不启用差速驱动或 `/cmd_vel`。
 - 仿真真值定位、速度链、安全门禁与停止测试必须各自通过后才能解锁运动。

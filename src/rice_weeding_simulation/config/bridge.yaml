@@ -4,5 +4,11 @@
   gz_type_name: gz.msgs.Clock
   direction: GZ_TO_ROS
 
-# Motion, odometry and sensor bridges are intentionally absent until their
-# ownership and stop behavior are contract-tested in Phase 2.
+- ros_topic_name: /rice_weeding/simulation/pose_info
+  gz_topic_name: /world/paddy_field/dynamic_pose/info
+  ros_type_name: tf2_msgs/msg/TFMessage
+  gz_type_name: gz.msgs.Pose_V
+  direction: GZ_TO_ROS
+
+# Motion, chassis odometry and sensor bridges remain absent until their
+# ownership and stop behavior are contract-tested in later Phase 2 gates.

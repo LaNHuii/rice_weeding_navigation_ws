@@ -4,9 +4,17 @@ environment:
   status: provisional_simulation_only
   frame_id: map
   axes: ros_right_handed_enu
+  map_origin:
+    verified: true
+    source: user_confirmed_2026-08-18
+    reference: southwest_outer_boundary_corner
+    x_axis: boundary_length_positive
+    y_axis: boundary_width_positive
+    z_axis: up
   simulation_spawn_pose:
     verified: false
     simulation_only: true
+    frame_id: gazebo_world
     x: 0.0
     y: 0.0
     yaw: 0.0

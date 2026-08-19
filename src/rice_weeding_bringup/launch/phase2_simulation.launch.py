@@ -32,6 +32,9 @@ def generate_launch_description():
         environment = yaml.safe_load(stream)["environment"]
 
     spawn_pose = environment["simulation_spawn_pose"]
+    field = environment["field"]
+    world_to_map_x = 0.5 * field["boundary_outer_length"]
+    world_to_map_y = 0.5 * field["boundary_outer_width"]
     surface_z = environment["terrain"]["surface_elevation"]
 
     return LaunchDescription([
@@ -41,6 +44,17 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 str(simulation_share / "launch/paddy_world.launch.py")
             )
+        ),
+        Node(
+            package="rice_weeding_simulation",
+            executable="simulation_truth_adapter.py",
+            name="rice_weeding_simulation_truth_adapter",
+            output="screen",
+            parameters=[
+                {"use_sim_time": True},
+                {"world_to_map_x": world_to_map_x},
+                {"world_to_map_y": world_to_map_y},
+            ],
         ),
         TimerAction(
             period=3.0,

@@ -24,10 +24,17 @@ colcon build --symlink-install
   作物覆盖全部内区，田埂为单一连续矩形外框，泥面和浅水无越界。
 - Phase 2 入口返回 `OK creation of entity`，Gazebo 实体树和截图均确认
   `rice_weeding_robot` 存在；ROS 话题中仍无 `/cmd_vel`。
+- Phase 2 真值入口从 Gazebo world 动态位姿读取机器人实际位置；左下角原点调整后隔离
+  动态验证 world `(0, 0, 0.05 m)` 正确转换为 map `(10, 7.5, 0.05 m)`；
+  `/rice_weeding/simulation/ground_truth` 发布者数为 1。
+- `map -> odom` 动态查询为 `(10, 7.5, 0) m` 平移；ROS 图中仍无 `/cmd_vel` 和
+  `/rice_weeding/localization/odometry`。
+- 隔离注入仿真时钟 `123.456 s` 与位姿 `(1, 2, 0.05 m)` 后，真值输出保持相同位姿并
+  使用 `123.456 s`，证明 Fortress Pose_V 顶层时间戳缺失的适配已生效。
 
 后续动态门禁：
 
-- TF edge 发布者唯一。
+- 下一底盘门禁闭合 `odom -> base_footprint` 后，TF edge 发布者仍唯一。
 - 零速度时机器人不漂移。
 - 非零速度只经过仿真安全链。
 - 机器人不得越过田埂或在种植区原地旋转。

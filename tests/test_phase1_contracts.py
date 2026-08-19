@@ -171,4 +171,61 @@ def test_phase2_spawn_pose_is_explicitly_simulation_only():
     pose = environment["simulation_spawn_pose"]
     assert pose["verified"] is False
     assert pose["simulation_only"] is True
+    assert pose["frame_id"] == "gazebo_world"
     assert environment["terrain"]["surface_elevation"] == 0.05
+
+
+def test_map_origin_is_the_user_selected_southwest_outer_corner():
+    environment = load_yaml("profiles/environments/paddy_field.yaml")["environment"]
+    origin = environment["map_origin"]
+    assert origin["verified"] is True
+    assert origin["reference"] == "southwest_outer_boundary_corner"
+    assert origin["x_axis"] == "boundary_length_positive"
+    assert origin["y_axis"] == "boundary_width_positive"
+    field = environment["field"]
+    assert field["boundary_outer_length"] / 2.0 == 10.0
+    assert field["boundary_outer_width"] / 2.0 == 7.5
+
+
+def test_phase2_truth_pose_bridge_and_adapter_are_simulation_scoped():
+    bridge = load_yaml("src/rice_weeding_simulation/config/bridge.yaml")
+    pose_bridge = next(
+        item for item in bridge
+        if item["ros_topic_name"] == "/rice_weeding/simulation/pose_info"
+    )
+    assert pose_bridge["gz_topic_name"] == "/world/paddy_field/dynamic_pose/info"
+    assert pose_bridge["ros_type_name"] == "tf2_msgs/msg/TFMessage"
+    assert pose_bridge["direction"] == "GZ_TO_ROS"
+
+    phase1 = (
+        ROOT / "src/rice_weeding_bringup/launch/phase1_simulation.launch.py"
+    ).read_text()
+    phase2 = (
+        ROOT / "src/rice_weeding_bringup/launch/phase2_simulation.launch.py"
+    ).read_text()
+    assert "simulation_truth_adapter.py" not in phase1
+    assert "simulation_truth_adapter.py" in phase2
+
+
+def test_truth_adapter_does_not_claim_chassis_odometry_edge():
+    adapter = (
+        ROOT / "src/rice_weeding_simulation/scripts/simulation_truth_adapter.py"
+    ).read_text()
+    assert '"ground_truth_topic"' in adapter
+    assert '"/rice_weeding/simulation/ground_truth"' in adapter
+    assert '"map_frame", "map"' in adapter
+    assert '"odom_frame", "odom"' in adapter
+    assert '"base_frame", "base_footprint"' in adapter
+    assert '"world_to_map_x", 0.0' in adapter
+    assert '"world_to_map_y", 0.0' in adapter
+    assert "self.get_clock().now().to_msg()" in adapter
+    assert "if rclpy.ok():" in adapter
+    assert "/rice_weeding/localization/odometry" not in adapter
+    assert "from tf2_ros import TransformBroadcaster" not in adapter
+    assert "StaticTransformBroadcaster(" in adapter
+
+    phase2 = (
+        ROOT / "src/rice_weeding_bringup/launch/phase2_simulation.launch.py"
+    ).read_text()
+    assert '0.5 * field["boundary_outer_length"]' in phase2
+    assert '0.5 * field["boundary_outer_width"]' in phase2

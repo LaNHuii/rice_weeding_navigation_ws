@@ -83,3 +83,24 @@ ros2 launch rice_weeding_bringup phase2_simulation.launch.py
 2026-08-17 动态验收中，`ros_gz_sim create` 返回 `OK creation of entity`，Gazebo
 实体树出现 `rice_weeding_robot`，且 ROS 图中仍无 `/cmd_vel`。因此“机器人实体生成”
 门禁已通过，下一门禁是仿真真值定位接口。
+
+### Phase 2：仿真真值定位门禁
+
+在机器人实体生成成果之上，新增 Gazebo world 动态位姿的 Pose_V bridge 和只由 Phase 2
+入口启动的真值适配器。该链路输出
+`/rice_weeding/simulation/ground_truth`，并唯一发布 `map -> odom`。
+
+本门禁不发布 `/rice_weeding/localization/odometry` 或 `odom -> base_footprint`，这两项属于
+下一步仿真底盘里程计；也没有开启 `/cmd_vel`。因此当前仍不能让 Nav2 驱动车辆，
+`motion_enabled` 继续强制为 `false`。
+
+2026-08-18 动态验收中，Gazebo 真值位置约为 `(0, 0, 0.05 m)`，真值话题只有一个
+发布者，`map -> odom` 为单位变换，且没有 `/cmd_vel` 和 Nav2 定位里程计话题。另以隔离
+消息注入验证仿真时间戳：输入 `123.456 s` 后真值输出保持 `123.456 s`。因此“仿真真值
+定位”门禁通过，下一门禁是仿真底盘里程计与 `odom -> base_footprint`。
+
+随后按用户要求将导航 `map` 原点调整到田块外边界左下角。Gazebo 场景继续以中心为
+world 原点，适配器从 environment profile 的 `20 m × 15 m` 尺寸派生 `(10, 7.5) m`
+平移；因此边界坐标为 `[0,20] × [0,15] m`，中心出生点的 map 坐标为 `(10,7.5)`。
+隔离动态验证中，world `(0,0,0.05)` 输出为 map `(10,7.5,0.05)`，同时
+`map -> odom` 查询结果为 `(10,7.5,0)`，坐标调整门禁通过。

@@ -21,6 +21,6 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(str(description_share / "launch" / "description.launch.py")),
             launch_arguments={"use_sim_time": "true"}.items()),
         Node(package="ros_gz_bridge", executable="parameter_bridge",
-             name="rice_weeding_clock_bridge", output="screen",
+             name="rice_weeding_simulation_bridge", output="screen",
              parameters=[{"config_file": str(bridge_config)}]),
     ])

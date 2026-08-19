@@ -14,7 +14,9 @@ paddy_field.sdf
       v
 Gazebo Sim ---- /clock
       |
-      +---- ground truth ---- map -> odom
+      +---- model pose ---- truth adapter ---- ground_truth
+      |                           |
+      |                           +---- map -> odom
       |
       +---- base motion ----- odom -> base_footprint
                                 |
@@ -29,7 +31,10 @@ robot_state_publisher ----------+---- base_link -> sensors
 
 ## 坐标系
 
-- `map`：田块本地 ENU 平面，x 向东/作业行正向，y 向北，z 向上。
+- `map`：原点位于田块外边界左下（西南）角，x 沿 `20 m` 长边正向，y 沿 `15 m`
+  短边正向，z 向上。因此边界坐标范围为 `[0, 20] × [0, 15] m`。
+- Gazebo world：为保留现有场景资产仍以田块中心为原点；真值适配器根据 environment
+  profile 的边界尺寸派生 `(10.0, 7.5) m` 平移，不在第二处复制场景尺寸。
 - `odom`：连续局部里程计坐标系。
 - `base_footprint`：机器人在泥面参考平面上的二维投影。
 - `base_link`：主体几何中心参考。
@@ -76,5 +81,10 @@ paddy_field.sdf + robot_description
           rice_weeding_robot (Gazebo entity)
 ```
 
-该门禁只验证安装态机器人可生成，不声称底盘运动或 Nav2 闭环已完成。
-当前场景无 headland，所以 `motion_enabled` 仍必须为 `false`。
+机器人实体生成门禁已通过。当前真值门禁把 Gazebo world 的动态模型世界位姿桥接到只在
+仿真入口运行的真值适配器，并筛选 `rice_weeding_robot`。适配器发布
+`/rice_weeding/simulation/ground_truth`。`odom` 与 Gazebo world 初始对齐，`map` 原点位于
+外边界左下角，因此适配器唯一发布平移为 `(10.0, 7.5, 0) m` 的 `map -> odom`。
+
+该门禁仍不发布 `odom -> base_footprint` 或 Nav2 使用的定位里程计；它们归下一步仿真
+底盘里程计所有。当前场景无 headland，所以 `motion_enabled` 仍必须为 `false`。
