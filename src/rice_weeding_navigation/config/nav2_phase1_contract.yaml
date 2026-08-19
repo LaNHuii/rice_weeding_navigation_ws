@@ -11,3 +11,8 @@ geometry:
   source_profile: profiles/platforms/rice_weeding_prototype.yaml
 crop_policy: {crops_are_obstacles: false, in_crop_in_place_rotation_allowed: false}
 motion: {enabled: false}
+safety:
+  gate_package: rice_weeding_safety
+  startup_motion_enabled: false
+  output_connected_to_chassis: true
+  watchdog_clock: monotonic_wall

@@ -5,7 +5,8 @@
   <maintainer email="maintainer@example.com">rice_weeding_navigation maintainers</maintainer><license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend><exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend><exec_depend>launch_ros</exec_depend><exec_depend>python3-yaml</exec_depend>
-  <exec_depend>rice_weeding_navigation</exec_depend><exec_depend>rice_weeding_simulation</exec_depend>
+  <exec_depend>rice_weeding_description</exec_depend><exec_depend>rice_weeding_navigation</exec_depend><exec_depend>rice_weeding_simulation</exec_depend>
+  <exec_depend>rice_weeding_safety</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
   <test_depend>ament_lint_auto</test_depend><test_depend>ament_lint_common</test_depend>
   <export><build_type>ament_cmake</build_type></export>

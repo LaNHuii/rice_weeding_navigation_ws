@@ -20,10 +20,11 @@ Phase 1 当前只建立一条数据链：
 ## 已确认与暂定参数
 
 - 用户已确认：主体长 `1.0 m`、宽 `1.0 m`、地面到主体顶面 `0.30 m`。
-- 用户已确认：稻苗行距与株距均为 `0.15 m`。
+- 用户当前确认：稻苗行距与株距均为 `0.30 m`。
 - 仿真假设：四个窄型笼式轮、左右差速、轮距 `0.75 m`、底盘净空 `0.16 m`。
 - 仿真假设：工作速度 `0.12 m/s`，最大速度 `0.25 m/s`，作业带宽 `0.75 m`。
-- 仿真假设：当前视觉验收场景为 `20 m x 15 m`、全内区作物覆盖、`0.05--0.10 m` 浅水。
+- 仿真假设：当前导航验收场景为 `20 m x 15 m`、沿稻行两端各 `2.50 m` 地头、
+  `0.05--0.10 m` 浅水。
 
 未经验证的值在 profile 中均带有 `verified: false` 或 `simulation_only: true`，不得直接用于实车。
 
@@ -32,6 +33,7 @@ Phase 1 当前只建立一条数据链：
 - `rice_weeding_description`：机器人几何、固定 TF 和 Xacro。
 - `rice_weeding_simulation`：稻田世界与 Gazebo Sim 接口边界。
 - `rice_weeding_navigation`：Nav2 参数/行为树边界，目前为占位包。
+- `rice_weeding_safety`：独立、默认禁用的速度安全门禁和墙钟 watchdog。
 - `rice_weeding_bringup`：第一阶段组合启动入口，目前执行依赖预检后启动场景骨架。
 
 ## 环境预检
@@ -122,3 +124,71 @@ map -> odom -> base_footprint -> base_link -> wheels/sensors
 只有一个发布者；完整 `map -> base_link` 查询为 `(11,9.5,0.28)`，与 map平移、底盘位姿
 和主体固定高度之和一致。TF树已经闭合，ROS图中仍无`/cmd_vel`，因此“仿真底盘里程计”
 门禁通过。下一门禁是仿真差速驱动替身与零速度不漂移测试。
+
+### Phase 2：仿真差速底盘替身门禁
+
+在保留上述真值和里程计链路的基础上，四个轮子改为 simulation-only 连续关节；轮质量、
+固体圆柱惯量替身、关节阻尼/摩擦以及差速几何继续只从 platform profile 读取。Gazebo
+内部加载 JointStatePublisher 和 DiffDrive，轮关节状态单向桥接为 ROS `/joint_states`。
+
+安全边界没有改变：ROS `/cmd_vel` 未创建，DiffDrive 的内部命令 topic 没有 bridge 或
+正常发布者，插件内部 odometry/TF 也不桥接 ROS，因此不会抢占现有唯一的
+`odom -> base_footprint`。Phase 2 入口增加 `headless:=true`，用于不弹出 Gazebo 窗口的
+动态检查。当时只允许验证插件加载、关节状态和零指令不漂移；当时场景没有 headland，
+因此不允许机器人实际行驶。
+
+2026-08-19 无界面动态验收中，机器人实体正常生成，`/joint_states` 只有一个发布者且包含
+四个轮关节；ROS 图无 `/cmd_vel` 和插件内部 odometry，Gazebo 内部命令 topic 也没有
+发布者。连续 `10.008 s` 的零指令观测得到平面位置漂移 `0.000000000 m`、偏航漂移
+`0.000000000 rad`，因此该替身门禁通过。当时的下一门禁是 `/cmd_vel` 软件安全边界；
+后续仍需在创建显式 headland 后才能解锁非零运动。
+
+### Phase 2：软件速度安全门禁
+
+对比了三种速度链方案：直接桥接最简单但没有失联保护；Nav2 `velocity_smoother` 适合
+平滑而不能作为独立授权边界；独立安全门禁能够在 Nav2 或仿真时钟异常时继续 fail closed。
+因此新增项目自有的 `rice_weeding_safety`，只保留当前需要的导航命令检查，没有复制参考
+项目的 BUNKER 履带参数、手动仲裁或 CAN 驱动逻辑。
+
+门禁消费 `/rice_weeding/navigation/cmd_vel_raw`，检查有限数与差速平面分量，按 platform
+profile 限制前进、后退和角速度，并使用单调墙钟执行 `0.50 s` 输入 watchdog。标准
+默认 Phase 2 启动强制 motion disabled。profile 地头检查通过且显式设置
+`motion_enabled:=true` 后，安全输出 `/rice_weeding/safety/cmd_vel` 才会桥接到 Gazebo。
+
+2026-08-19 无界面验证中，标准入口收到 `(0.20, 0.20)` 非零命令仍输出全零，状态为
+`motion_disabled`。在完全不启动 Gazebo 的隔离 ROS 域中，输入 `(0.8, 0.8)` 被限制为
+`(0.25, 0.35)`，最后一条命令后 `0.508 s` 自动归零并报告 `input_timeout`。该门禁因此
+通过，但当时这里只验证软件输出，不代表 Gazebo 或实车已完成制动；后续经用户授权创建
+显式 headland 并连接安全输出，结果记录在下一节。
+
+### Phase 2：地头场景与低速掉头门禁
+
+经用户授权，当前 `paddy_field` 直接改为导航验证场景：外边界继续保持 `20 m × 15 m`，
+稻苗行距与株距改为 `0.30 m`，沿稻行两端各保留 `2.50 m` 地头。根据离散网格生成结果，
+场景共有 2,401 株 visual-only 稻苗，实际无苗地头宽度约 `2.64 m`。
+
+当且仅当 profile 地头宽度满足平台所需 `2.50 m` 且显式设置 `motion_enabled:=true` 时，
+安全门禁输出才单向桥接到 Gazebo DiffDrive；原始导航命令不能直连。2026-08-20 无界面
+验证中，机器人在东侧地头完成“转 `90°`、横移约 `0.64 m`、再转 `90°`”的低速掉头，最终
+真值 map 位姿约为 `(18.595, 8.136)`、朝向约 `179.4°`，并在超时后以零 Odometry Twist
+停止。下一门禁是 Nav2 的定点导航和田埂边界拒绝。
+
+### Phase 2：Nav2 定点导航门禁（正在验证）
+
+新增 profile 驱动的静态 `/map`：地图原点仍是田块西南外边界；四周田埂标为占用，稻苗保持
+作物语义而不写入 Nav2 障碍层。标准 Nav2 的 `/cmd_vel` 由一个无状态适配器转发至
+`/rice_weeding/navigation/cmd_vel_raw`，之后仍必须经过已有的限幅、平面检查和 `0.50 s`
+墙钟 watchdog，只有 safe output 可到 Gazebo DiffDrive。
+
+当前控制器只接受简单的前向目标点，行为树没有 Spin、BackUp 或自动恢复动作，并关闭原地转向和
+倒车；这确保失败会中止并由门禁停车，而不是在作物区尝试恢复。完整启动入口为：
+
+```bash
+ros2 launch rice_weeding_bringup phase2_nav2_simulation.launch.py motion_enabled:=true
+```
+
+2026-08-20 无界面隔离启动验证中，修正了 Humble 对局部代价地图整数尺寸参数、行为树插件
+预加载以及中文工作空间路径重写的兼容问题。随后 `controller_server`、`planner_server` 和
+`bt_navigator` 均启动，控制器状态服务返回 `active`，`/navigate_to_pose` 等 action 可发现；
+发送目标前真值为 map `(18.5, 7.5)`。定点运动命令因执行权限审批连接中断而没有实际发出，
+所以动态目标到达、停车和田埂外目标拒绝仍待验收，当前不得标记为通过。

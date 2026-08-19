@@ -54,10 +54,10 @@ robot_state_publisher ----------+---- base_link -> sensors
 - 稻苗按 environment profile 的行距、株距和单株几何逐株生成，不使用连续长条视觉替身。
 - 全宽作物使用断开的单株几何合并网格渲染，降低 Gazebo visual 数量；
   泥面、浅水和四条田埂的尺寸均从 environment profile 生成。
-- 当前视觉验收场景为 `20 m × 15 m`，面积是原 `30 m × 20 m` 的一半；
-  可见田埂是单一连续矩形环形网格，四向碰撞体隐藏，泥面和浅水限定在内轮廓。
-- 应用用户要求的全内区作物覆盖后当前无可用 headland，所以该场景仅用于视觉与
-  场景验收，motion 必须保持 disabled。
+- 当前导航验收场景为 `20 m × 15 m`，面积是原 `30 m × 20 m` 的一半；可见田埂是单一
+  连续矩形环形网格，四向碰撞体隐藏，泥面和浅水限定在内轮廓。
+- 稻苗行距和株距均为 `0.30 m`；沿稻行的两端各保留 profile 指定的 `2.50 m` headland。
+  作物网格离散后实际无苗宽度约 `2.64 m`，用于低速掉头与停车验证。
 - Phase 1 启动入口不连接 CAN、底盘驱动或真实 `/cmd_vel`。
 - 缺少 Gazebo/桥接依赖时启动必须失败并给出缺失包名。
 
@@ -86,8 +86,9 @@ paddy_field.sdf + robot_description
 `/rice_weeding/simulation/ground_truth`。`odom` 与 Gazebo world 初始对齐，`map` 原点位于
 外边界左下角，因此适配器唯一发布平移为 `(10.0, 7.5, 0) m` 的 `map -> odom`。
 
-真值门禁自身不发布 `odom -> base_footprint` 或 Nav2 使用的定位里程计；它们归后续独立
-仿真底盘里程计所有。当前场景无 headland，所以 `motion_enabled` 仍必须为 `false`。
+真值门禁自身不发布 `odom -> base_footprint` 或 Nav2 使用的定位里程计；它们归独立仿真
+底盘里程计所有。当前场景具备 profile 驱动的两端 headland，仍须显式设置
+`motion_enabled:=true` 才能运动。
 
 ## Phase 2 仿真底盘里程计门禁
 
@@ -104,6 +105,74 @@ simulation_chassis_odometry
 /rice_weeding/localization/odometry   odom -> base_footprint
 ```
 
-至此 TF 结构闭合为 `map -> odom -> base_footprint -> base_link -> sensors`。当前节点只是
-simulation-only 位姿替身，Twist 在 motion disabled 门禁下保持零；它不代表轮速积分、
-打滑模型或差速驱动已经完成。
+至此 TF 结构闭合为 `map -> odom -> base_footprint -> base_link -> sensors`。节点是
+simulation-only 位姿替身：motion disabled 时 Twist 为零，motion enabled 时从连续 Gazebo
+位姿差分得到 Twist；它不代表轮速积分、打滑模型或实车里程计。
+
+## Phase 2 仿真差速底盘替身门禁
+
+四个轮子由固定关节改为 simulation-only 连续关节，质量、惯量替身、阻尼、摩擦、轮距、
+轴距和速度限制均从 platform profile 消费。Gazebo 内部 JointStatePublisher 输出轮关节
+状态，经单向 bridge 形成 ROS `/joint_states`；内部 DiffDrive 为以后安全速度链保留动力学
+入口。
+
+```text
+Gazebo wheel joints ---- internal joint state ---- bridge ---- /joint_states
+
+raw navigation command -X-> internal/locked_cmd_vel
+
+safe command ------------> internal/locked_cmd_vel ---- DiffDrive
+                                      |
+                                      +---- internal odom/TF -X-> ROS
+```
+
+`-X->` 表示当前刻意不连接。安全命令唯一接入 DiffDrive，且内部 odometry/TF 保持断开，
+避免产生第二个里程计/TF 发布者。默认仍禁止非零速度；只有 profile 的地头检查通过后显式
+开启仿真运动。
+
+## Phase 2 软件速度安全门禁
+
+参考项目采用独立安全仲裁层，这一隔离思想适合当前实车迁移；但其 BUNKER 履带参数、
+手动优先仲裁和 CAN 接口不适用于当前四轮稻田底盘，因此没有复制。当前实现保持最小链路：
+
+```text
+future Nav2 controller
+        |
+        v
+/rice_weeding/navigation/cmd_vel_raw
+        |
+        v
+rice_weeding_safety -- wall-clock timeout / finite / planar / limit checks
+        |
+        v
+/rice_weeding/safety/cmd_vel  --->  Gazebo internal command
+                         -X->  real chassis
+```
+
+默认 Phase 2 启动强制门禁禁用并持续发布零。只有环境 profile 的地头宽度不少于 platform
+profile 要求并显式设置 `motion_enabled:=true` 时，安全输出才桥接到 Gazebo DiffDrive。这个
+门禁不替代硬件急停、实车底盘 watchdog 或实车制动距离验证。
+
+## Phase 2 Nav2 定点导航门禁
+
+Phase 2 现在增加一条受限的 Nav2 闭环，且仍只作用于 Gazebo：
+
+```text
+environment profile -> static /map (bund occupied, crops free)
+                              |
+                              v
+map -> odom -> base_footprint -> Nav2 planner/controller
+                                      |
+                                      v
+                                 /cmd_vel -> adapter -> cmd_vel_raw
+                                      |
+                                      v
+                               existing safety gate -> Gazebo DiffDrive
+```
+
+地图以 profile 的 `map` 西南原点生成，田埂成为静态占用并经 footprint/inflation 形成边界拒绝。
+Nav2 footprint 也由启动入口读取平台 profile 后写入临时参数，避免复制几何。稻苗不进入该地图；
+这是当前语义合同，不是“稻苗可忽略”的实车安全结论。
+
+当前只配置无 Spin、无 BackUp 的“规划 + 前向跟随”行为树，且关闭 Nav2 原地转向、倒车。因此
+验证目标必须位于当前朝向的前方和田埂内；转弯与覆盖行为仍留给后续专门的地头/覆盖门禁。

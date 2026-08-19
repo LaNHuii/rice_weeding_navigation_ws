@@ -43,6 +43,13 @@ platform:
     wheel_count: 4
     wheel_diameter: 0.29
     wheel_width: 0.06
+    wheel_mass: 1.0
+    wheel_inertia_model: solid_cylinder_substitute
+    joint_damping: 1.0
+    joint_friction: 0.2
+    zero_command_test_duration: 10.0
+    zero_command_position_tolerance: 0.002
+    zero_command_yaw_tolerance: 0.002
     track_width: 0.75
     wheelbase: 0.675
     in_crop_in_place_rotation_allowed: false
@@ -54,6 +61,14 @@ platform:
     max_angular_velocity: 0.35
     max_linear_acceleration: 0.20
     max_linear_deceleration: 0.40
+  safety:
+    verified: false
+    simulation_only: true
+    startup_motion_enabled: false
+    command_timeout: 0.50
+    publish_rate: 20.0
+    reject_nonplanar_twist: true
+    nonplanar_epsilon: 1.0e-9
   coverage:
     simulation_only: true
     operation_width: 0.75

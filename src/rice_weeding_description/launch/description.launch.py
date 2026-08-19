@@ -20,6 +20,10 @@ def generate_launch_description():
     body_height = dimensions["height_from_ground"] - clearance
     body_center_z = clearance + 0.5 * body_height
     drive = platform["drive"]
+    body_mass = platform["mass"]["value"] - drive["wheel_count"] * drive["wheel_mass"]
+    if body_mass <= 0.0:
+        raise RuntimeError("Platform mass must exceed the simulated wheel mass total.")
+    limits = platform["limits"]
     sensors = platform["sensors"]
     xacro_file = share / "urdf" / "rice_weeding_robot.urdf.xacro"
     robot_description = ParameterValue(
@@ -29,11 +33,19 @@ def generate_launch_description():
             " body_width:=", str(dimensions["width"]),
             " body_height:=", str(body_height),
             " body_center_z:=", str(body_center_z),
-            " mass:=", str(platform["mass"]["value"]),
+            " body_mass:=", str(body_mass),
+            " wheel_mass:=", str(drive["wheel_mass"]),
             " wheel_diameter:=", str(drive["wheel_diameter"]),
             " wheel_width:=", str(drive["wheel_width"]),
+            " wheel_joint_damping:=", str(drive["joint_damping"]),
+            " wheel_joint_friction:=", str(drive["joint_friction"]),
             " track_width:=", str(drive["track_width"]),
             " wheelbase:=", str(drive["wheelbase"]),
+            " max_forward_velocity:=", str(limits["max_forward_velocity"]),
+            " max_reverse_velocity:=", str(limits["max_reverse_velocity"]),
+            " max_angular_velocity:=", str(limits["max_angular_velocity"]),
+            " max_linear_acceleration:=", str(limits["max_linear_acceleration"]),
+            " max_linear_deceleration:=", str(limits["max_linear_deceleration"]),
             " sensor_height:=", str(sensors["operational_sensor_height"]["value"]),
             " gnss_baseline:=", str(sensors["dual_gnss_baseline"]["value"]),
         ]), value_type=str)

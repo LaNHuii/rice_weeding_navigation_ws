@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate the bounded field and full-width visual-only crop mesh."""
+"""Regenerate the bounded field and visual-only crop mesh from its profile."""
 
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -57,11 +57,19 @@ def main():
     inner_width = outer_width - 2.0 * bund_thickness
     row_spacing = float(crop_grid["row_spacing"])
     plant_spacing = float(crop_grid["plant_spacing"])
+    headland_width = float(field["headland_width"])
     footprint_length = float(visual_model["footprint_length"])
     footprint_width = float(visual_model["footprint_width"])
     height = float(visual_model["height"])
+    if crop_grid["row_direction_yaw"] != 0.0:
+        raise ValueError("The current crop mesh generator supports rows along field length only")
+    if field.get("headland_axis") != "field_length_ends":
+        raise ValueError("Headlands must occupy both ends of the field length")
+    crop_length = inner_length - 2.0 * headland_width
+    if crop_length < footprint_length:
+        raise ValueError("Headlands leave no room for crop plants")
     row_count = int((inner_width - footprint_width) / row_spacing) + 1
-    plant_count = int((inner_length - footprint_length) / plant_spacing) + 1
+    plant_count = int((crop_length - footprint_length) / plant_spacing) + 1
     color = " ".join(str(value) for value in visual_model["color_rgba"])
 
     # Make the mud and water fit exactly inside the four bunds.
@@ -96,6 +104,7 @@ def main():
             model.find("link").remove(visual)
 
     # One OBJ keeps Gazebo responsive while every plant remains a disconnected cuboid.
+    # Crops are centered in the remaining length, leaving symmetric end headlands.
     MESH.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# Generated from profiles/environments/paddy_field.yaml",
              "mtllib paddy_crops.mtl", "o paddy_crops", "usemtl rice_green",

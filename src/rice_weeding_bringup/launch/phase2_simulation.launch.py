@@ -12,24 +12,34 @@ from launch.actions import (
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
-def _reject_motion(context):
+def _validate_motion(context, environment, required_headland_width):
     if LaunchConfiguration("motion_enabled").perform(context).lower() in {
         "1", "true", "yes", "on",
     }:
-        raise RuntimeError(
-            "Phase 2 simulation remains motion-disabled. Complete the velocity "
-            "chain, explicit headland, safety gate and stop tests first."
-        )
+        field = environment["field"]
+        crop_grid = environment["crop_grid"]
+        if field["headland_width"] < required_headland_width:
+            raise RuntimeError("Motion requires the platform-profile minimum headland width.")
+        if not crop_grid["full_inner_coverage"]["motion_compatible"]:
+            raise RuntimeError("Motion requires a crop layout marked motion-compatible.")
     return []
 
 
 def generate_launch_description():
     simulation_share = Path(get_package_share_directory("rice_weeding_simulation"))
+    safety_share = Path(get_package_share_directory("rice_weeding_safety"))
+    description_share = Path(get_package_share_directory("rice_weeding_description"))
     environment_profile = simulation_share / "profiles/environments/paddy_field.yaml"
     with environment_profile.open("r", encoding="utf-8") as stream:
         environment = yaml.safe_load(stream)["environment"]
+    platform_profile = description_share / "profiles/platforms/rice_weeding_prototype.yaml"
+    with platform_profile.open("r", encoding="utf-8") as stream:
+        required_headland_width = yaml.safe_load(stream)["platform"]["coverage"][
+            "required_headland_width"
+        ]
 
     spawn_pose = environment["simulation_spawn_pose"]
     field = environment["field"]
@@ -39,11 +49,27 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument("motion_enabled", default_value="false"),
-        OpaqueFunction(function=_reject_motion),
+        DeclareLaunchArgument("headless", default_value="false"),
+        OpaqueFunction(
+            function=_validate_motion,
+            kwargs={
+                "environment": environment,
+                "required_headland_width": required_headland_width,
+            },
+        ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 str(simulation_share / "launch/paddy_world.launch.py")
-            )
+            ),
+            launch_arguments={"headless": LaunchConfiguration("headless")}.items(),
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                str(safety_share / "launch/safety_gate.launch.py")
+            ),
+            launch_arguments={
+                "startup_motion_enabled": LaunchConfiguration("motion_enabled")
+            }.items(),
         ),
         Node(
             package="rice_weeding_simulation",
@@ -63,7 +89,9 @@ def generate_launch_description():
             output="screen",
             parameters=[
                 {"use_sim_time": True},
-                {"motion_enabled": False},
+                {"motion_enabled": ParameterValue(
+                    LaunchConfiguration("motion_enabled"), value_type=bool
+                )},
             ],
         ),
         TimerAction(

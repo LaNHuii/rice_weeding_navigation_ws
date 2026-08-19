@@ -15,7 +15,7 @@ environment:
     verified: false
     simulation_only: true
     frame_id: gazebo_world
-    x: 0.0
+    x: 8.50
     y: 0.0
     yaw: 0.0
   field:
@@ -31,11 +31,12 @@ environment:
       height: 0.18
       visual_topology: single_rectangular_frame
       color_rgba: [0.38, 0.27, 0.12, 1.0]
-    headland_width: 0.0
+    headland_width: 2.50
+    headland_axis: field_length_ends
   crop_grid:
     source: user_confirmed_2026-08-17
-    row_spacing: 0.15
-    plant_spacing: 0.15
+    row_spacing: 0.30
+    plant_spacing: 0.30
     row_direction_yaw: 0.0
     position_jitter: 0.015
     missing_plant_ratio: 0.03
@@ -49,8 +50,8 @@ environment:
       color_rgba: [0.05, 0.72, 0.08, 1.0]
     full_inner_coverage:
       simulation_only: true
-      enabled: true
-      motion_compatible: false
+      enabled: false
+      motion_compatible: true
   water:
     simulation_only: true
     minimum_depth: 0.05
