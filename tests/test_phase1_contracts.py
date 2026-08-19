@@ -163,7 +163,7 @@ def test_phase2_spawn_gate_is_separate_and_fail_closed():
     assert 'executable="create"' in phase2
     assert '"-topic", "robot_description"' in phase2
     assert 'DeclareLaunchArgument("motion_enabled", default_value="false")' in phase2
-    assert "Phase 2 entity-spawn gate is motion-disabled" in phase2
+    assert "Phase 2 simulation remains motion-disabled" in phase2
 
 
 def test_phase2_spawn_pose_is_explicitly_simulation_only():
@@ -229,3 +229,26 @@ def test_truth_adapter_does_not_claim_chassis_odometry_edge():
     ).read_text()
     assert '0.5 * field["boundary_outer_length"]' in phase2
     assert '0.5 * field["boundary_outer_width"]' in phase2
+
+
+def test_phase2_chassis_odometry_owns_only_its_declared_edge():
+    chassis = (
+        ROOT / "src/rice_weeding_simulation/scripts/simulation_chassis_odometry.py"
+    ).read_text()
+    truth = (
+        ROOT / "src/rice_weeding_simulation/scripts/simulation_truth_adapter.py"
+    ).read_text()
+    phase2 = (
+        ROOT / "src/rice_weeding_bringup/launch/phase2_simulation.launch.py"
+    ).read_text()
+
+    assert '"/rice_weeding/localization/odometry"' in chassis
+    assert '"odom_frame", "odom"' in chassis
+    assert '"base_frame", "base_footprint"' in chassis
+    assert "from tf2_ros import TransformBroadcaster" in chassis
+    assert "StaticTransformBroadcaster" not in chassis
+    assert '"motion_enabled", False' in chassis
+    assert "The chassis odometry gate is pose-only and motion-disabled" in chassis
+    assert "/rice_weeding/localization/odometry" not in truth
+    assert "simulation_chassis_odometry.py" in phase2
+    assert '{"motion_enabled": False}' in phase2

@@ -86,5 +86,24 @@ paddy_field.sdf + robot_description
 `/rice_weeding/simulation/ground_truth`。`odom` 与 Gazebo world 初始对齐，`map` 原点位于
 外边界左下角，因此适配器唯一发布平移为 `(10.0, 7.5, 0) m` 的 `map -> odom`。
 
-该门禁仍不发布 `odom -> base_footprint` 或 Nav2 使用的定位里程计；它们归下一步仿真
-底盘里程计所有。当前场景无 headland，所以 `motion_enabled` 仍必须为 `false`。
+真值门禁自身不发布 `odom -> base_footprint` 或 Nav2 使用的定位里程计；它们归后续独立
+仿真底盘里程计所有。当前场景无 headland，所以 `motion_enabled` 仍必须为 `false`。
+
+## Phase 2 仿真底盘里程计门禁
+
+独立 `simulation_chassis_odometry` 节点订阅同一个 Gazebo world 动态模型位姿，但不应用
+`map` 左下角偏移，而是在与 Gazebo world 对齐的 `odom` 中发布：
+
+```text
+/rice_weeding/simulation/pose_info
+                 |
+                 v
+simulation_chassis_odometry
+       |                   |
+       v                   v
+/rice_weeding/localization/odometry   odom -> base_footprint
+```
+
+至此 TF 结构闭合为 `map -> odom -> base_footprint -> base_link -> sensors`。当前节点只是
+simulation-only 位姿替身，Twist 在 motion disabled 门禁下保持零；它不代表轮速积分、
+打滑模型或差速驱动已经完成。

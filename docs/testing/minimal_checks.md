@@ -32,9 +32,18 @@ colcon build --symlink-install
 - 隔离注入仿真时钟 `123.456 s` 与位姿 `(1, 2, 0.05 m)` 后，真值输出保持相同位姿并
   使用 `123.456 s`，证明 Fortress Pose_V 顶层时间戳缺失的适配已生效。
 
+已执行的仿真底盘里程计动态门禁（2026-08-19）：
+
+- `/rice_weeding/localization/odometry` 只有一个发布者，frame 为 `odom`，child 为
+  `base_footprint`。
+- `odom -> base_footprint` 只由仿真底盘里程计发布，并与 Odometry pose 一致。
+- TF 树闭合为 `map -> odom -> base_footprint -> base_link -> sensors`。
+- motion disabled 时 Twist 全零，且 ROS 图中仍无 `/cmd_vel`。
+- 隔离注入 odom pose `(1,2,0.05)` 后，完整 `map -> base_link` 查询为
+  `(11,9.5,0.28)`，与 map 偏移、底盘位姿和 canonical 主体高度之和一致。
+
 后续动态门禁：
 
-- 下一底盘门禁闭合 `odom -> base_footprint` 后，TF edge 发布者仍唯一。
-- 零速度时机器人不漂移。
+- 差速驱动门禁启用后，零速度时机器人不漂移。
 - 非零速度只经过仿真安全链。
 - 机器人不得越过田埂或在种植区原地旋转。

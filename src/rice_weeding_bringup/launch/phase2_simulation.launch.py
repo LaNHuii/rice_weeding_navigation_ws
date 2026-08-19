@@ -19,7 +19,7 @@ def _reject_motion(context):
         "1", "true", "yes", "on",
     }:
         raise RuntimeError(
-            "Phase 2 entity-spawn gate is motion-disabled. Complete the velocity "
+            "Phase 2 simulation remains motion-disabled. Complete the velocity "
             "chain, explicit headland, safety gate and stop tests first."
         )
     return []
@@ -54,6 +54,16 @@ def generate_launch_description():
                 {"use_sim_time": True},
                 {"world_to_map_x": world_to_map_x},
                 {"world_to_map_y": world_to_map_y},
+            ],
+        ),
+        Node(
+            package="rice_weeding_simulation",
+            executable="simulation_chassis_odometry.py",
+            name="rice_weeding_simulation_chassis_odometry",
+            output="screen",
+            parameters=[
+                {"use_sim_time": True},
+                {"motion_enabled": False},
             ],
         ),
         TimerAction(

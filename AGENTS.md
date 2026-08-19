@@ -55,6 +55,8 @@
 - Phase 1 的文档、启动入口和验收证据必须保留，Phase 2 使用独立入口迭代。
 - Gazebo 机器人实体生成门禁已通过，初始位姿从 environment profile 消费。
 - 仿真真值定位门禁已通过；当前仿真入口允许真值适配器唯一发布 `map -> odom` 和仿真真值话题，该适配器不得在实车入口启用。
-- `odom -> base_footprint` 和 `/rice_weeding/localization/odometry` 仍保留给下一门禁的仿真底盘里程计，真值适配器不得冒充其发布者。
+- 仿真底盘里程计门禁已通过；独立节点唯一发布 `odom -> base_footprint` 和 `/rice_weeding/localization/odometry`，真值适配器不得冒充其发布者。
+- 当前里程计位姿来自 Gazebo 模型真值，速度在 motion disabled 门禁下显式为零；不得将其声称为轮速里程计或实车验证结果。
 - 当前不启用差速驱动或 `/cmd_vel`。
+- 下一门禁是仿真差速驱动替身；在显式 headland、安全门禁和停止测试完成前仍不得解锁运动。
 - 仿真真值定位、速度链、安全门禁与停止测试必须各自通过后才能解锁运动。

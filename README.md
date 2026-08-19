@@ -77,8 +77,8 @@ source install/setup.bash
 ros2 launch rice_weeding_bringup phase2_simulation.launch.py
 ```
 
-当前 Phase 2 仍强制 `motion_enabled=false`，不提供差速驱动、`/cmd_vel`、仿真里程计或
-真值 TF。机器人实体可见不等于 Nav2 闭环已完成。
+该初始门禁当时强制 `motion_enabled=false`，不提供差速驱动、`/cmd_vel`、仿真里程计或
+真值 TF。机器人实体可见不等于 Nav2 闭环已完成；这些状态记录保留用于说明阶段演进。
 
 2026-08-17 动态验收中，`ros_gz_sim create` 返回 `OK creation of entity`，Gazebo
 实体树出现 `rice_weeding_robot`，且 ROS 图中仍无 `/cmd_vel`。因此“机器人实体生成”
@@ -104,3 +104,21 @@ world 原点，适配器从 environment profile 的 `20 m × 15 m` 尺寸派生 
 平移；因此边界坐标为 `[0,20] × [0,15] m`，中心出生点的 map 坐标为 `(10,7.5)`。
 隔离动态验证中，world `(0,0,0.05)` 输出为 map `(10,7.5,0.05)`，同时
 `map -> odom` 查询结果为 `(10,7.5,0)`，坐标调整门禁通过。
+
+### Phase 2：仿真底盘里程计门禁
+
+新增独立的 simulation-only 底盘里程计节点，消费 Gazebo world 中的机器人模型位姿，
+发布 `/rice_weeding/localization/odometry`，并唯一广播 `odom -> base_footprint`。因此
+TF 可闭合为：
+
+```text
+map -> odom -> base_footprint -> base_link -> wheels/sensors
+```
+
+该门禁没有启用差速驱动或 `/cmd_vel`。当前 Twist 在 motion disabled 条件下显式为零，
+所以不能把这一成果描述为轮速里程计、打滑仿真或Nav2运动闭环。
+
+2026-08-19 隔离动态验收中，注入 `odom` pose `(1,2,0.05)` 后，定位 Odometry数值一致且
+只有一个发布者；完整 `map -> base_link` 查询为 `(11,9.5,0.28)`，与 map平移、底盘位姿
+和主体固定高度之和一致。TF树已经闭合，ROS图中仍无`/cmd_vel`，因此“仿真底盘里程计”
+门禁通过。下一门禁是仿真差速驱动替身与零速度不漂移测试。
