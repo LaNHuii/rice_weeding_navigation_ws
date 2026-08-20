@@ -1,0 +1,31 @@
+phase3_localization_contract:
+  status: interface_stub
+  simulation_only: true
+  threshold_verified: false
+  tf_ownership:
+    map_to_odom_owner: future_unique_fusion_localization_node
+    odom_to_base_footprint_owner: future_unique_continuous_odometry_node
+    publishes_tf_in_phase3_stub: false
+  topics:
+    gnss_left_fix: /rice_weeding/localization/gnss_left/fix
+    gnss_right_fix: /rice_weeding/localization/gnss_right/fix
+    imu_data: /rice_weeding/localization/imu/data
+    wheel_odometry: /rice_weeding/localization/wheel_odometry
+    fused_odometry: /rice_weeding/localization/fused/odometry
+    status: /rice_weeding/localization/status
+  health_semantics:
+    rtk_fix:
+      verified: false
+      source: sensor_msgs/NavSatFix.status.status
+    position_covariance:
+      verified: false
+      source: NavSatFix.position_covariance and Odometry.pose.covariance
+    yaw_covariance:
+      verified: false
+      source: Imu.orientation_covariance and Odometry.pose.covariance
+    data_freshness:
+      verified: false
+      source: message header stamps
+    position_jump:
+      verified: false
+      source: fused odometry pose delta

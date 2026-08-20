@@ -17,6 +17,12 @@
 | `/rice_weeding/perception/obstacle_cloud` | `sensor_msgs/msg/PointCloud2` | 未来感知层 | local costmap | 接口占位 |
 | `/rice_weeding/perception/crop_rows` | `visualization_msgs/msg/MarkerArray` | 未来稻行感知 | 显示/行跟踪 | 接口占位 |
 | `/rice_weeding/perception/weeds` | 待定义 | 未来杂草感知 | 作业协调器 | 本阶段不定义自定义消息 |
+| `/rice_weeding/localization/gnss_left/fix` | `sensor_msgs/msg/NavSatFix` | 未来左 GNSS 天线驱动 | 未来融合定位、Phase 3 健康监视器 | Phase 3 接口桩订阅，无真实驱动 |
+| `/rice_weeding/localization/gnss_right/fix` | `sensor_msgs/msg/NavSatFix` | 未来右 GNSS 天线驱动 | 未来融合定位、Phase 3 健康监视器 | Phase 3 接口桩订阅，无真实驱动 |
+| `/rice_weeding/localization/imu/data` | `sensor_msgs/msg/Imu` | 未来 IMU 驱动 | 未来融合定位、Phase 3 健康监视器 | Phase 3 接口桩订阅，无真实驱动 |
+| `/rice_weeding/localization/wheel_odometry` | `nav_msgs/msg/Odometry` | 未来轮速里程计 | 未来融合定位、Phase 3 健康监视器 | Phase 3 接口桩订阅，无真实轮速 |
+| `/rice_weeding/localization/fused/odometry` | `nav_msgs/msg/Odometry` | 未来融合定位 | Nav2、诊断、Phase 3 健康监视器 | Phase 3 接口桩订阅，不发布假定位 |
+| `/rice_weeding/localization/status` | `diagnostic_msgs/msg/DiagnosticArray` | `rice_weeding_localization` 健康监视器；未来融合定位 | 安全/运维/记录 | Phase 3 合同桩：Fix、协方差、时效、跳变原因 |
 
 ## TF 发布责任
 
@@ -65,6 +71,18 @@ Gazebo 内部 DiffDrive；原始命令和插件内部 odometry 仍不桥接。�
 检查和限幅；只有 safe topic 能进入 Gazebo。Phase 2 行为树没有 Spin、BackUp 或自动恢复动作，
 控制器也关闭原地转向和倒车：无路径或控制失败时应中止并依赖 watchdog 停车，而不是在作物区
 尝试恢复动作。
+
+## Phase 3 定位接口与健康语义
+
+Phase 3 的 GNSS、IMU、轮速与融合里程计话题仍为接口占位，不能被误读为已有传感器驱动或
+融合算法。当前已有健康监视器发布 `/rice_weeding/localization/status`，用于检查接口语义和
+可回放测试合同；它不发布 TF，也不发布融合 Odometry。未来实车的融合定位节点唯一发布 `map -> odom`；未来轮速里程计唯一
+发布 `odom -> base_footprint`。现有 `simulation_truth_adapter` 与
+`simulation_chassis_odometry` 仍只允许由仿真入口启动。
+
+`/rice_weeding/localization/status` 至少应表达 RTK Fix 是否有效、位置与偏航协方差、各输入的
+接收时效、融合输出的跳变检测结果及失效原因。数值阈值、地理坐标原点、RTK 基站地址和设备
+路径均不在本接口合同中硬编码，必须由后续实测配置提供。
 
 ## 作物语义
 

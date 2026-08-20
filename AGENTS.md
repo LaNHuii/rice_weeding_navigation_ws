@@ -56,3 +56,14 @@
 - 当前只允许在 Gazebo 中生成机器人实体，初始位姿从 environment profile 消费。
 - 当前不启用差速驱动、`/cmd_vel`、`odom -> base_footprint` 或 `map -> odom`。
 - 仿真真值定位、速度链、安全门禁与停止测试必须各自通过后才能解锁运动。
+
+## Phase 3 planning boundary
+
+- Phase 3 当前只允许定义双天线 GNSS、IMU、轮速、融合定位和定位健康状态的接口、文档、
+  包骨架与可回放测试合同；不得接入真实设备、RTK 基站、滤波器实现或实车速度输出。
+- `rice_weeding_localization` 当前只能作为 Phase 3 接口桩与健康状态合同包；默认不得发布
+  `map -> odom`、`odom -> base_footprint` 或假的融合 Odometry。
+- 未来实车 `map -> odom` 只可由唯一融合定位节点发布；未来实车
+  `odom -> base_footprint` 只可由唯一连续里程计节点发布。仿真真值与仿真底盘节点不得复用。
+- 定位健康语义至少包含 Fix、位置/偏航协方差、数据时效与位置跳变。未取得实测数据前，
+  健康阈值必须标为未验证，不得硬编码为实车安全结论。

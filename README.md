@@ -34,6 +34,7 @@ Phase 1 当前只建立一条数据链：
 - `rice_weeding_simulation`：稻田世界与 Gazebo Sim 接口边界。
 - `rice_weeding_navigation`：Nav2 参数/行为树边界，目前为占位包。
 - `rice_weeding_safety`：独立、默认禁用的速度安全门禁和墙钟 watchdog。
+- `rice_weeding_localization`：Phase 3 定位输入、融合输出和健康状态接口桩。
 - `rice_weeding_bringup`：第一阶段组合启动入口，目前执行依赖预检后启动场景骨架。
 
 ## 环境预检
@@ -192,3 +193,35 @@ ros2 launch rice_weeding_bringup phase2_nav2_simulation.launch.py motion_enabled
 `bt_navigator` 均启动，控制器状态服务返回 `active`，`/navigate_to_pose` 等 action 可发现；
 发送目标前真值为 map `(18.5, 7.5)`。定点运动命令因执行权限审批连接中断而没有实际发出，
 所以动态目标到达、停车和田埂外目标拒绝仍待验收，当前不得标记为通过。
+
+## Phase 3（定位融合接口与健康门禁设计）
+
+Phase 3 先建立未来实车定位的接口与验收边界，不实现 RTK/IMU/轮速融合算法、不接入真实
+设备，也不改变现有 Gazebo 真值、Nav2 或速度链的运行行为。当前新增
+`rice_weeding_localization` 包和健康状态合同入口，用来表达“当前位置是否可信”，但不发布
+真实 `map -> odom`、不发布假的融合定位。
+
+规划中的输入和输出如下；传感器/融合话题均为接口占位，当前只有健康监视器会发布状态：
+
+| 类别 | 规划接口 | ROS 类型 | 用途 |
+| --- | --- | --- | --- |
+| 左 GNSS 天线 | `/rice_weeding/localization/gnss_left/fix` | `sensor_msgs/msg/NavSatFix` | 双天线基线的左端原始定位 |
+| 右 GNSS 天线 | `/rice_weeding/localization/gnss_right/fix` | `sensor_msgs/msg/NavSatFix` | 双天线基线的右端原始定位 |
+| IMU | `/rice_weeding/localization/imu/data` | `sensor_msgs/msg/Imu` | 姿态与角速度观测 |
+| 轮速里程计 | `/rice_weeding/localization/wheel_odometry` | `nav_msgs/msg/Odometry` | 连续局部运动观测 |
+| 融合里程计 | `/rice_weeding/localization/fused/odometry` | `nav_msgs/msg/Odometry` | 未来供 Nav2 消费的统一定位输出 |
+| 定位健康状态 | `/rice_weeding/localization/status` | `diagnostic_msgs/msg/DiagnosticArray` | Phase 3 已有合同桩；报告 Fix、协方差、时效、跳变与门禁原因 |
+
+未来实车只能由唯一的定位融合节点发布 `map -> odom`；轮速里程计节点唯一发布
+`odom -> base_footprint`。现有仿真真值适配器只能保留在仿真入口，绝不能被当作实车融合定位。
+健康门禁将至少检查 RTK Fix 状态、位置/偏航协方差、消息时效与位置跳变；具体数值阈值在取得
+实车传感器数据前均不设为已验证参数。
+
+Phase 3 合同入口为：
+
+```bash
+ros2 launch rice_weeding_bringup phase3_localization_contract.launch.py
+```
+
+该入口不启动 Gazebo 和 Nav2，也不会让机器人运动。Phase 3 的完成条件是接口、坐标外参、TF 所有权、健康状态语义和可回放的测试用例均已定义；
+它不等于 RTK 实测精度、传感器标定完成或实车自主行驶通过。

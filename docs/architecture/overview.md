@@ -176,3 +176,27 @@ Nav2 footprint 也由启动入口读取平台 profile 后写入临时参数，�
 
 当前只配置无 Spin、无 BackUp 的“规划 + 前向跟随”行为树，且关闭 Nav2 原地转向、倒车。因此
 验证目标必须位于当前朝向的前方和田埂内；转弯与覆盖行为仍留给后续专门的地头/覆盖门禁。
+
+## Phase 3 定位融合接口与健康门禁
+
+Phase 3 不接入真实设备，也不实现融合滤波器；只固定未来实车定位所需的数据边界和失效语义。
+现有仿真真值与仿真底盘里程计继续只服务于仿真入口，不能充当实车定位实现。
+
+```text
+left GNSS fix ──┐
+right GNSS fix ─┼── future localization fusion ── fused odometry ── Nav2
+IMU data ───────┤                 │
+wheel odometry ─┘                 ├── map -> odom (future real-system owner)
+                                  └── localization status
+                                         Fix / covariance / freshness / jump
+```
+
+当前代码只提供 `rice_weeding_localization` 包、健康评估逻辑、健康监视器节点和
+`phase3_localization_contract.launch.py` 合同入口。该节点订阅计划中的双 GNSS、IMU、轮速
+里程计和融合里程计话题，发布 `/rice_weeding/localization/status`，但不发布 TF，也不发布
+假的融合 Odometry。
+
+未来融合节点是实车 `map -> odom` 的唯一 owner；连续轮速里程计是实车
+`odom -> base_footprint` 的唯一 owner。健康状态不是第二条速度链，而是定位是否可被导航系统
+信任的诊断依据。若 Fix 状态无效、协方差过大、消息过期或位置跳变，融合输出必须被标记为
+不可用；具体动作策略在取得实车数据后单独定义，当前不自动接入 Gazebo 或实车底盘。

@@ -62,6 +62,7 @@ def test_ros_packages_are_independent_and_discoverable():
     assert packages == [
         "rice_weeding_bringup",
         "rice_weeding_description",
+        "rice_weeding_localization",
         "rice_weeding_navigation",
         "rice_weeding_safety",
         "rice_weeding_simulation",
