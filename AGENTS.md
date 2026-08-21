@@ -63,6 +63,12 @@
   包骨架与可回放测试合同；不得接入真实设备、RTK 基站、滤波器实现或实车速度输出。
 - `rice_weeding_localization` 当前只能作为 Phase 3 接口桩与健康状态合同包；默认不得发布
   `map -> odom`、`odom -> base_footprint` 或假的融合 Odometry。
+- Phase 3 replay 样例只能发布 simulation-only 输入消息，用于合同验证；不得伪装成真实
+  传感器驱动、RTK 固定解或实车融合定位。
+- Phase 3 状态自检工具只能订阅 `/rice_weeding/localization/status`，不得发布定位、TF
+  或速度输出。
+- Phase 3 外参合同可记录仿真 profile 派生值，但必须标为未验证；真实 rosbag 规范不得把
+  仿真真值当作实车参考输入。
 - 未来实车 `map -> odom` 只可由唯一融合定位节点发布；未来实车
   `odom -> base_footprint` 只可由唯一连续里程计节点发布。仿真真值与仿真底盘节点不得复用。
 - 定位健康语义至少包含 Fix、位置/偏航协方差、数据时效与位置跳变。未取得实测数据前，

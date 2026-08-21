@@ -70,6 +70,10 @@ def evaluate_localization_health(observation, thresholds):
     reasons = []
     if not thresholds.verified:
         reasons.append("thresholds_unverified")
+    if not observation.gnss_left_fix_ok:
+        reasons.append("gnss_left_fix_unavailable")
+    if not observation.gnss_right_fix_ok:
+        reasons.append("gnss_right_fix_unavailable")
     if not (observation.gnss_left_fix_ok and observation.gnss_right_fix_ok):
         reasons.append("rtk_fix_unavailable")
     if _has_missing_input(observation):

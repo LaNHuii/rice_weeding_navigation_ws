@@ -191,12 +191,19 @@ wheel odometry ─┘                 ├── map -> odom (future real-system 
                                          Fix / covariance / freshness / jump
 ```
 
-当前代码只提供 `rice_weeding_localization` 包、健康评估逻辑、健康监视器节点和
-`phase3_localization_contract.launch.py` 合同入口。该节点订阅计划中的双 GNSS、IMU、轮速
-里程计和融合里程计话题，发布 `/rice_weeding/localization/status`，但不发布 TF，也不发布
-假的融合 Odometry。
+当前代码提供 `rice_weeding_localization` 包、健康评估逻辑、健康监视器节点、
+`phase3_localization_contract.launch.py` 合同入口，以及 simulation-only 的
+`phase3_localization_replay.launch.py` 可回放样例入口。健康监视器订阅计划中的双 GNSS、IMU、
+轮速里程计和融合里程计话题，发布 `/rice_weeding/localization/status`，但不发布 TF，也不发布
+假的融合 Odometry。replay 样例只用于触发 `nominal`、`no_fix`、`left_no_fix`、
+`right_no_fix`、`high_covariance`、`stale` 和 `jump` 健康状态，不代表真实传感器精度。
 
 未来融合节点是实车 `map -> odom` 的唯一 owner；连续轮速里程计是实车
 `odom -> base_footprint` 的唯一 owner。健康状态不是第二条速度链，而是定位是否可被导航系统
 信任的诊断依据。若 Fix 状态无效、协方差过大、消息过期或位置跳变，融合输出必须被标记为
 不可用；具体动作策略在取得实车数据后单独定义，当前不自动接入 Gazebo 或实车底盘。
+
+当前 GNSS/IMU 外参只沿用 `robot_description` 的固定 TF 和 platform profile：
+`imu_link` 位于 `base_link`，双 GNSS 以 `0.70 m` baseline 对称安装，仿真高度为
+`0.65 m`。这些均为未验证仿真假设。真实系统记录 rosbag 时必须记录 `/tf`、`/tf_static`、
+双 GNSS、IMU、轮速里程计、融合里程计和定位健康状态；仿真真值不得混入实车定位记录。

@@ -223,5 +223,23 @@ Phase 3 合同入口为：
 ros2 launch rice_weeding_bringup phase3_localization_contract.launch.py
 ```
 
-该入口不启动 Gazebo 和 Nav2，也不会让机器人运动。Phase 3 的完成条件是接口、坐标外参、TF 所有权、健康状态语义和可回放的测试用例均已定义；
+新增的可回放合同入口为：
+
+```bash
+ros2 launch rice_weeding_bringup phase3_localization_replay.launch.py scenario:=nominal
+```
+
+`scenario` 可取 `nominal`、`no_fix`、`left_no_fix`、`right_no_fix`、`high_covariance`、
+`stale`、`jump`，分别用于验证正常输入、双天线无 Fix、单天线无 Fix、协方差过高、数据过期
+和位置跳变诊断。该入口只发布 simulation-only 样例消息，不启动 Gazebo 和 Nav2，也不会让机器人运动。
+Phase 3 的完成条件是接口、坐标外参、TF 所有权、健康状态语义和可回放的测试用例均已定义；
 它不等于 RTK 实测精度、传感器标定完成或实车自主行驶通过。
+
+第二个终端可用 `localization_status_expect.py` 自动等待目标诊断原因，例如
+`position_jump_detected`、`rtk_fix_unavailable` 或 `gnss_left_stale`。该工具只读
+`/rice_weeding/localization/status`，不会发布速度、TF 或定位。
+
+Phase 3 的坐标外参和未来 rosbag 记录规范见
+`docs/testing/phase3_localization_checks.md`。当前 GNSS/IMU 外参均来自仿真 profile 和
+robot_description 固定 TF，仍为未验证值；真实天线相位中心、IMU 安装方向和时延必须等实车
+测量后再升级。

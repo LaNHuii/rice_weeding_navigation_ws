@@ -80,6 +80,18 @@ Phase 3 的 GNSS、IMU、轮速与融合里程计话题仍为接口占位，不�
 发布 `odom -> base_footprint`。现有 `simulation_truth_adapter` 与
 `simulation_chassis_odometry` 仍只允许由仿真入口启动。
 
+`phase3_localization_replay.launch.py` 会启动 simulation-only 样例发布器，向上述输入 topic
+发布 `nominal`、`no_fix`、`left_no_fix`、`right_no_fix`、`high_covariance`、`stale`
+或 `jump` 场景数据。这些样例只用于验证健康状态合同，不得作为真实传感器驱动、滤波器输出
+或实车安全阈值。
+`localization_status_expect.py` 只订阅 `/rice_weeding/localization/status` 并等待指定
+reason 出现，用作 replay 合同自检；它不得发布任何定位、TF 或速度输出。
+
+Phase 3 外参合同写入 `src/rice_weeding_localization/config/localization_phase3_contract.yaml`：
+`imu_link`、`gnss_left_link` 和 `gnss_right_link` 均来自 robot_description 固定 TF，当前状态为
+`verified: false`。未来真实 rosbag 必须记录 `/tf` 与 `/tf_static`，使这些外参可以和传感器
+消息一起回放检查。
+
 `/rice_weeding/localization/status` 至少应表达 RTK Fix 是否有效、位置与偏航协方差、各输入的
 接收时效、融合输出的跳变检测结果及失效原因。数值阈值、地理坐标原点、RTK 基站地址和设备
 路径均不在本接口合同中硬编码，必须由后续实测配置提供。

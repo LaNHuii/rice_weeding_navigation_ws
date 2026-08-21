@@ -16,7 +16,7 @@
 | 软件速度安全门禁 | SIMULATED | 默认禁用、限幅、超时归零；唯一安全输出已桥接仿真 DiffDrive | Nav2 输出经安全门禁 |
 | 仿真底盘实际运动 | SIMULATED | 东侧地头内完成 `90° → 0.64 m 横移 → 90°` 掉头；最终朝向约 `179.4°`，timeout 后 odom Twist 为零 | Nav2 定点导航、田埂边界拒绝 |
 | Nav2 真值闭环 | BUILT | profile 驱动 `/map`、forward-only 行为树、无状态命令适配器和安全门禁已接入；生命周期与 action 动态启动通过 | 动态定点到达、停车、田埂外目标拒绝 |
-| RTK/IMU/轮速融合接口 | SKELETON | `rice_weeding_localization` 包、健康监视器、合同 launch 和可回放健康逻辑测试；无驱动、无滤波器、无实测 | 坐标外参、健康阈值与 rosbag 回放样例 |
+| RTK/IMU/轮速融合接口 | SKELETON | `rice_weeding_localization` 包、健康监视器、7类 simulation-only replay 样例、状态自检工具、外参合同和 rosbag 记录规范；可验证 Fix、协方差、时效、跳变；无驱动、无滤波器、无实测 | 真实 rosbag 样本和实测外参 |
 | 稻行/杂草视觉 | NOT_STARTED | 语义接口占位 | 单独定义数据集、标注和指标 |
 | 覆盖规划 | NOT_STARTED | `0.75 m` 作业带为仿真假设 | 明确除草机构宽度后再接规划器 |
 

@@ -13,6 +13,25 @@ phase3_localization_contract:
     wheel_odometry: /rice_weeding/localization/wheel_odometry
     fused_odometry: /rice_weeding/localization/fused/odometry
     status: /rice_weeding/localization/status
+  extrinsics:
+    source: profiles/platforms/rice_weeding_prototype.yaml and robot_description fixed TF
+    verified: false
+    simulation_only: true
+    parent_frame: base_link
+    imu_link:
+      xyz: [0.0, 0.0, 0.0]
+      rpy: [0.0, 0.0, 0.0]
+    gnss_left_link:
+      xyz: [0.0, 0.35, 0.42]
+      rpy: [0.0, 0.0, 0.0]
+    gnss_right_link:
+      xyz: [0.0, -0.35, 0.42]
+      rpy: [0.0, 0.0, 0.0]
+    base_footprint_to_gnss_height: 0.65
+    dual_gnss_baseline: 0.70
+    notes:
+      - Values are derived from simulation profile arguments.
+      - Real antenna phase centers and IMU mounting offsets must be measured before field use.
   health_semantics:
     rtk_fix:
       verified: false
@@ -29,3 +48,41 @@ phase3_localization_contract:
     position_jump:
       verified: false
       source: fused odometry pose delta
+  replay_contract:
+    simulation_only: true
+    thresholds_verified: false
+    scenarios:
+      - nominal
+      - no_fix
+      - left_no_fix
+      - right_no_fix
+      - high_covariance
+      - stale
+      - jump
+    thresholds:
+      max_gnss_age: 0.50
+      max_imu_age: 0.50
+      max_wheel_odometry_age: 0.50
+      max_fused_odometry_age: 0.50
+      max_position_covariance: 0.10
+      max_yaw_covariance: 0.05
+      max_position_jump: 0.20
+  rosbag_contract:
+    status: recording_spec_only
+    verified: false
+    simulation_only: false
+    required_topics:
+      - /tf
+      - /tf_static
+      - /rice_weeding/localization/gnss_left/fix
+      - /rice_weeding/localization/gnss_right/fix
+      - /rice_weeding/localization/imu/data
+      - /rice_weeding/localization/wheel_odometry
+      - /rice_weeding/localization/fused/odometry
+      - /rice_weeding/localization/status
+    forbidden_topics:
+      - /rice_weeding/simulation/ground_truth
+      - /rice_weeding/safety/cmd_vel
+    notes:
+      - Real rosbag recording is not performed in Phase 3.
+      - Simulation ground truth may be recorded only in simulation-only evaluation bags.
