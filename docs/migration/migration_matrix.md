@@ -7,7 +7,7 @@
 
 | 模块/数据链 | 当前状态 | 当前证据 | 下一门禁 |
 | --- | --- | --- | --- |
-| 工作空间与合同 | BUILT | 6个包被 colcon 发现并构建；根合同测试覆盖 Phase 1/2/3 静态边界 | 继续按模块补充动态合同 |
+| 工作空间与合同 | BUILT | 7个包被 colcon 发现并构建；根合同测试覆盖 Phase 1/2/3/4 静态边界 | 继续按模块补充动态合同 |
 | 车辆描述 | SIMULATED | canonical profile、Xacro/URDF 树和安装态发布通过；Phase 2 动态生成 `rice_weeding_robot` 实体并截图验收 | 实车尺寸复测与仿真轮组运动关节 |
 | 稻田场景 | SIMULATED | `20 m × 15 m = 300 m²`；2,401 株绿色作物按 `0.30 m` 网格排列；两端各有 `2.50 m` 地头，田埂为单一连续矩形外框 | Nav2 可通行空间与边界拒绝验证 |
 | 仿真真值定位 | SIMULATED | Gazebo world 中心 `(0,0,0.05)` 转换为 map `(10,7.5,0.05)`；`map -> odom` 实测平移 `(10,7.5,0)`；时间戳与单发布者验证通过 | 仿真底盘里程计闭合 `odom -> base_footprint` |
@@ -17,6 +17,7 @@
 | 仿真底盘实际运动 | SIMULATED | 东侧地头内完成 `90° → 0.64 m 横移 → 90°` 掉头；最终朝向约 `179.4°`，timeout 后 odom Twist 为零 | Nav2 定点导航、田埂边界拒绝 |
 | Nav2 真值闭环 | BUILT | profile 驱动 `/map`、forward-only 行为树、无状态命令适配器和安全门禁已接入；生命周期与 action 动态启动通过 | 动态定点到达、停车、田埂外目标拒绝 |
 | RTK/IMU/轮速融合接口 | SKELETON | `rice_weeding_localization` 包、健康监视器、7类 simulation-only replay 样例、状态自检工具、外参合同和 rosbag 记录规范；可验证 Fix、协方差、时效、跳变；无驱动、无滤波器、无实测 | 真实 rosbag 样本和实测外参 |
+| 稻田语义地图 | SKELETON | `rice_weeding_semantics` 包、稻田 GeoJSON schema、示例语义地图和无 ROS/Qt 校验工具；未迁移 Qt/server/Nav2 keepout | 语义地图 server 与 RViz Marker |
 | 稻行/杂草视觉 | NOT_STARTED | 语义接口占位 | 单独定义数据集、标注和指标 |
 | 覆盖规划 | NOT_STARTED | `0.75 m` 作业带为仿真假设 | 明确除草机构宽度后再接规划器 |
 

@@ -1,0 +1,63 @@
+schema_version: "1.0"
+frame_id: map
+reference:
+  workspace: agt_navigation_v2-main
+  direct_tool_migration: false
+  reference_patterns:
+    - semantic_model data pattern
+    - semantic_io atomic file pattern
+    - semantic_validation contract pattern
+  direct_migration_rule:
+    - Directly migrated tools must be standalone and plug-in-like.
+    - Phase 4 current files are rice-field-specific implementations, not copied AGT tools.
+  not_directly_migrated:
+    - Qt semantic editor
+    - semantic_map_server ROS node
+    - Nav2 KeepoutFilter launch integration
+    - coverage planning code
+feature_types:
+  field_boundary:
+    geometry: Polygon
+    required_minimum: 1
+    meaning: outer paddy operating boundary
+  crop_row:
+    geometry: LineString
+    required_minimum: 0
+    navigation_obstacle_default: false
+    meaning: protected rice row or row centerline
+  weed_patch:
+    geometry: Polygon
+    required_minimum: 0
+    navigation_obstacle_default: false
+    meaning: weeding work target
+  hard_obstacle:
+    geometry: Polygon
+    required_minimum: 0
+    required_property: safety_layer
+    meaning: person, stone, implement, bund or other collision hazard
+  negative_obstacle:
+    geometry: Polygon
+    required_minimum: 0
+    required_property: safety_layer
+    meaning: ditch, pit or missing support area
+  headland_zone:
+    geometry: Polygon
+    required_minimum: 1
+    meaning: explicit turn area
+  keepout_zone:
+    geometry: Polygon
+    required_minimum: 0
+    required_property: safety_layer
+    meaning: semantic no-go area
+  work_direction:
+    geometry: LineString
+    required_minimum: 1
+    meaning: preferred operation direction
+policies:
+  base_occupancy_grid_read_only: true
+  crop_rows_are_default_obstacles: false
+  weeds_are_default_obstacles: false
+  keepout_mask_sources:
+    - hard_obstacle
+    - negative_obstacle
+    - keepout_zone

@@ -1,0 +1,109 @@
+{
+  "type": "FeatureCollection",
+  "schema_version": "1.0",
+  "map_id": "paddy_demo",
+  "frame_id": "map",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0.0, 0.0], [20.0, 0.0], [20.0, 15.0], [0.0, 15.0], [0.0, 0.0]]]
+      },
+      "properties": {
+        "id": "field_outer_boundary",
+        "feature_type": "field_boundary",
+        "name": "Paddy outer boundary",
+        "enabled": true,
+        "frame_id": "map"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0.15, 0.15], [2.65, 0.15], [2.65, 14.85], [0.15, 14.85], [0.15, 0.15]]]
+      },
+      "properties": {
+        "id": "west_headland",
+        "feature_type": "headland_zone",
+        "name": "West headland",
+        "enabled": true,
+        "frame_id": "map"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[17.35, 0.15], [19.85, 0.15], [19.85, 14.85], [17.35, 14.85], [17.35, 0.15]]]
+      },
+      "properties": {
+        "id": "east_headland",
+        "feature_type": "headland_zone",
+        "name": "East headland",
+        "enabled": true,
+        "frame_id": "map"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[1.0, 7.5], [19.0, 7.5]]
+      },
+      "properties": {
+        "id": "work_direction_lengthwise",
+        "feature_type": "work_direction",
+        "name": "Lengthwise work direction",
+        "enabled": true,
+        "frame_id": "map"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[2.65, 3.0], [17.35, 3.0]]
+      },
+      "properties": {
+        "id": "crop_row_sample",
+        "feature_type": "crop_row",
+        "name": "Sample crop row",
+        "enabled": true,
+        "frame_id": "map",
+        "navigation_obstacle": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[8.0, 6.0], [8.5, 6.0], [8.5, 6.4], [8.0, 6.4], [8.0, 6.0]]]
+      },
+      "properties": {
+        "id": "weed_patch_sample",
+        "feature_type": "weed_patch",
+        "name": "Sample weed patch",
+        "enabled": true,
+        "frame_id": "map",
+        "navigation_obstacle": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[12.0, 8.0], [12.6, 8.0], [12.6, 8.5], [12.0, 8.5], [12.0, 8.0]]]
+      },
+      "properties": {
+        "id": "stone_sample",
+        "feature_type": "hard_obstacle",
+        "name": "Sample hard obstacle",
+        "enabled": true,
+        "frame_id": "map",
+        "safety_layer": "hard_obstacle"
+      }
+    }
+  ]
+}

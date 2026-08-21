@@ -65,6 +65,7 @@ def test_ros_packages_are_independent_and_discoverable():
         "rice_weeding_localization",
         "rice_weeding_navigation",
         "rice_weeding_safety",
+        "rice_weeding_semantics",
         "rice_weeding_simulation",
     ]
     for manifest in (ROOT / "src").glob("*/package.xml"):

@@ -69,6 +69,15 @@
   或速度输出。
 - Phase 3 外参合同可记录仿真 profile 派生值，但必须标为未验证；真实 rosbag 规范不得把
   仿真真值当作实车参考输入。
+
+## Phase 4 semantic boundary
+
+- Phase 4 当前只允许定义稻田语义地图 schema、示例文件、无 ROS/Qt 数据工具和静态合同测试。
+- `crop_row` 与 `weed_patch` 不得默认写入 Nav2 障碍层；`hard_obstacle`、
+  `negative_obstacle` 和 `keepout_zone` 才能进入后续安全/禁行 mask 合同。
+- 参考工程工具若要直接迁移，必须是独立、即插即用模块；当前 `rice_weeding_semantics`
+  是稻田版自写工具，只参考 AGT 语义数据合同思路。
+- 当前不得迁移 Qt 编辑器、语义地图 server、Nav2 KeepoutFilter 总控或覆盖规划代码。
 - 未来实车 `map -> odom` 只可由唯一融合定位节点发布；未来实车
   `odom -> base_footprint` 只可由唯一连续里程计节点发布。仿真真值与仿真底盘节点不得复用。
 - 定位健康语义至少包含 Fix、位置/偏航协方差、数据时效与位置跳变。未取得实测数据前，

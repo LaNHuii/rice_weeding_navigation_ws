@@ -69,6 +69,21 @@ robot_state_publisher ----------+---- base_link -> sensors
 - Phase 5：覆盖规划、地头掉头、路径验证和仿真执行。
 - Phase 6：杂草检测坐标变换与除草触发接口。
 
+## Phase 4 稻田语义地图合同
+
+Phase 4 先建立独立语义文件和无 ROS/Qt 数据工具，不直接启动视觉算法、Qt 编辑器、Nav2
+KeepoutFilter 或覆盖规划。基础 `/map` 保持只读，语义对象写入 GeoJSON：
+
+```text
+field_boundary + crop_row + weed_patch + hard_obstacle
+negative_obstacle + headland_zone + keepout_zone + work_direction
+```
+
+本阶段参考 `agt_navigation_v2-main` 的语义数据合同思路，但当前没有直接迁移参考工程工具。
+若后续直接迁移工具，只允许选择独立、即插即用的模块。稻苗 `crop_row` 和杂草 `weed_patch`
+不会默认进入 Nav2 障碍层；只有 `hard_obstacle`、`negative_obstacle` 和 `keepout_zone` 进入
+后续安全/禁行 mask 合同。
+
 ## Phase 2 当前门禁
 
 Phase 2 使用 `phase2_simulation.launch.py` 作为独立入口。它复用 Phase 1 稻田世界和

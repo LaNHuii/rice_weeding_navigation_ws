@@ -35,6 +35,7 @@ Phase 1 当前只建立一条数据链：
 - `rice_weeding_navigation`：Nav2 参数/行为树边界，目前为占位包。
 - `rice_weeding_safety`：独立、默认禁用的速度安全门禁和墙钟 watchdog。
 - `rice_weeding_localization`：Phase 3 定位输入、融合输出和健康状态接口桩。
+- `rice_weeding_semantics`：Phase 4 稻田语义地图 schema、GeoJSON 示例和无 ROS/Qt 数据工具。
 - `rice_weeding_bringup`：第一阶段组合启动入口，目前执行依赖预检后启动场景骨架。
 
 ## 环境预检

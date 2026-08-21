@@ -102,3 +102,7 @@ Phase 3 外参合同写入 `src/rice_weeding_localization/config/localization_ph
 - `weed`：作业目标，不是导航障碍。
 - `hard_obstacle`：人员、石块、农具、田埂等，需要进入局部安全链。
 - `negative_obstacle`：沟渠、坑洞，后续以独立可通行性层表达。
+
+Phase 4 新增 `rice_weeding_semantics` 无 ROS/Qt 数据工具和
+`docs/interfaces/rice_semantic_map_schema.md`。当前只定义 GeoJSON 文件合同、示例地图和静态校验，
+尚不发布 ROS topic。后续语义 server 才会把语义转换为 Marker、keepout mask 或其他 ROS 消息。
