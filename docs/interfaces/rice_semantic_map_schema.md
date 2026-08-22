@@ -38,9 +38,23 @@ Phase 4 使用独立 GeoJSON 语义文件表达稻田对象。基础 `/map` Occu
 
 ## 当前实现
 
-`rice_weeding_semantics` 只包含无 ROS、无 Qt 的数据工具和示例文件。它不会发布 TF、速度、
-Nav2 costmap 或实车控制命令。后续语义地图 server 必须作为独立门禁实现。
+`rice_weeding_semantics` 只包含无 Qt 的数据工具、示例文件和一个只读 RViz Marker 预览节点。
+它不会发布 TF、速度、Nav2 costmap 或实车控制命令。后续语义地图 server 必须作为独立门禁实现。
 
 `profile_semantic_builder.py` 可从 `profiles/environments/paddy_field.yaml` 派生
 simulation-only 语义图：田块边界、profile 指定的 x 方向两端 headland、作业方向和逐行
 `crop_row`。它不推断杂草或真实障碍；这些必须来自后续标注或感知输入。
+`generate_profile_semantic_map.py` 是同一能力的离线命令行入口，只读 environment profile 并把
+结果写成 GeoJSON，不启动 ROS graph。
+`semantic_marker_preview.py` 是只读 RViz 预览入口，只发布 MarkerArray，不发布 mask、TF、
+Odometry、速度或 Nav2 costmap。
+
+`semantic_mask.py` 是纯数据 keepout mask 生成器，只消费 `hard_obstacle`、
+`negative_obstacle` 和 `keepout_zone`。它不会把 `crop_row` 或 `weed_patch` 栅格成障碍物，
+也不会发布 ROS `OccupancyGrid`；后续语义 server 才能把该数据包装为 ROS 消息。
+`generate_keepout_mask.py` 是同一能力的离线命令行入口，可输出 simulation-only 的
+`.pgm + .yaml` mask 文件工件；该工件用于合同验证，不等于已经接入 Nav2 KeepoutFilter。
+`semantic_keepout_mask_publisher.py` 是显式门禁保护的 simulation-only 在线发布入口，
+发布 `/rice_weeding/semantics/keepout_mask`（`nav_msgs/msg/OccupancyGrid`）。它要求命令行
+携带 `--acknowledge-simulation-only`，不启动 Nav2、不发布 TF/速度/Odometry，也不代表实车
+语义地图 server 已完成。

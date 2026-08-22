@@ -72,11 +72,24 @@
 
 ## Phase 4 semantic boundary
 
-- Phase 4 当前只允许定义稻田语义地图 schema、示例文件、无 ROS/Qt 数据工具和静态合同测试。
+- Phase 4 当前只允许定义稻田语义地图 schema、示例文件、无 Qt 数据工具、静态合同测试和
+  一个只读 RViz Marker 预览节点。
 - `crop_row` 与 `weed_patch` 不得默认写入 Nav2 障碍层；`hard_obstacle`、
   `negative_obstacle` 和 `keepout_zone` 才能进入后续安全/禁行 mask 合同。
 - 参考工程工具若要直接迁移，必须是独立、即插即用模块；当前 `rice_weeding_semantics`
   是稻田版自写工具，只参考 AGT 语义数据合同思路。
+- Phase 4 纯数据 keepout mask 只能由 `hard_obstacle`、`negative_obstacle` 和
+  `keepout_zone` 生成；不得从 `crop_row` 或 `weed_patch` 生成默认障碍。
+- Phase 4 离线生成器只能从显式传入的 environment profile 生成 simulation-only GeoJSON；
+  不得硬编码工作空间路径或伪装成实车语义标注。
+- Phase 4 离线 keepout mask 导出器只能生成 simulation-only 文件工件；不得启动 Nav2
+  KeepoutFilter、发布 ROS `OccupancyGrid` 或伪装成在线语义地图 server。
+- Phase 4 允许一个显式门禁保护的 simulation-only keepout mask 发布器；它只能读取显式传入的
+  GeoJSON，且必须要求用户确认 simulation-only，发布 `/rice_weeding/semantics/keepout_mask`。
+  它不得启动 Nav2 KeepoutFilter、发布 TF、速度、Odometry 或实车控制。
+- Phase 4 允许一个只读 RViz Marker 预览节点，它只能读取显式传入的 GeoJSON 并发布
+  `/rice_weeding/semantics/markers`；不得发布 TF、速度、Odometry、keepout mask 或 Nav2
+  costmap。
 - 当前不得迁移 Qt 编辑器、语义地图 server、Nav2 KeepoutFilter 总控或覆盖规划代码。
 - 未来实车 `map -> odom` 只可由唯一融合定位节点发布；未来实车
   `odom -> base_footprint` 只可由唯一连续里程计节点发布。仿真真值与仿真底盘节点不得复用。

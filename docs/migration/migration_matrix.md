@@ -17,7 +17,7 @@
 | 仿真底盘实际运动 | SIMULATED | 东侧地头内完成 `90° → 0.64 m 横移 → 90°` 掉头；最终朝向约 `179.4°`，timeout 后 odom Twist 为零 | Nav2 定点导航、田埂边界拒绝 |
 | Nav2 真值闭环 | BUILT | profile 驱动 `/map`、forward-only 行为树、无状态命令适配器和安全门禁已接入；生命周期与 action 动态启动通过 | 动态定点到达、停车、田埂外目标拒绝 |
 | RTK/IMU/轮速融合接口 | SKELETON | `rice_weeding_localization` 包、健康监视器、7类 simulation-only replay 样例、状态自检工具、外参合同和 rosbag 记录规范；可验证 Fix、协方差、时效、跳变；无驱动、无滤波器、无实测 | 真实 rosbag 样本和实测外参 |
-| 稻田语义地图 | SKELETON | `rice_weeding_semantics` 包、稻田 GeoJSON schema、示例语义地图和无 ROS/Qt 校验工具；未迁移 Qt/server/Nav2 keepout | 语义地图 server 与 RViz Marker |
+| 稻田语义地图 | SKELETON | `rice_weeding_semantics` 包、稻田 GeoJSON schema、示例语义地图、profile 派生工具、离线生成器、纯数据 keepout mask、`.pgm + .yaml` mask 导出、只读 RViz Marker 预览和显式门禁 `OccupancyGrid` mask 发布；未迁移 Qt/server/Nav2 keepout | Nav2 KeepoutFilter 接入门禁 |
 | 稻行/杂草视觉 | NOT_STARTED | 语义接口占位 | 单独定义数据集、标注和指标 |
 | 覆盖规划 | NOT_STARTED | `0.75 m` 作业带为仿真假设 | 明确除草机构宽度后再接规划器 |
 

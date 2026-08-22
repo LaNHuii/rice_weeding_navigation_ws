@@ -16,6 +16,8 @@
 | `/rice_weeding/safety/status` | `diagnostic_msgs/msg/DiagnosticArray` | `rice_weeding_safety` | 运维/未来作业协调器 | motion disabled、限幅、非法输入和超时原因 |
 | `/rice_weeding/perception/obstacle_cloud` | `sensor_msgs/msg/PointCloud2` | 未来感知层 | local costmap | 接口占位 |
 | `/rice_weeding/perception/crop_rows` | `visualization_msgs/msg/MarkerArray` | 未来稻行感知 | 显示/行跟踪 | 接口占位 |
+| `/rice_weeding/semantics/markers` | `visualization_msgs/msg/MarkerArray` | `rice_weeding_semantics` 只读预览 | RViz | Phase 4 语义层可视化；不驱动导航 |
+| `/rice_weeding/semantics/keepout_mask` | `nav_msgs/msg/OccupancyGrid` | `rice_weeding_semantics` 显式门禁发布器 | RViz/未来 Nav2 KeepoutFilter | simulation-only；不含 `crop_row`/`weed_patch` 默认障碍；不等于已接 Nav2 |
 | `/rice_weeding/perception/weeds` | 待定义 | 未来杂草感知 | 作业协调器 | 本阶段不定义自定义消息 |
 | `/rice_weeding/localization/gnss_left/fix` | `sensor_msgs/msg/NavSatFix` | 未来左 GNSS 天线驱动 | 未来融合定位、Phase 3 健康监视器 | Phase 3 接口桩订阅，无真实驱动 |
 | `/rice_weeding/localization/gnss_right/fix` | `sensor_msgs/msg/NavSatFix` | 未来右 GNSS 天线驱动 | 未来融合定位、Phase 3 健康监视器 | Phase 3 接口桩订阅，无真实驱动 |
@@ -103,6 +105,14 @@ Phase 3 外参合同写入 `src/rice_weeding_localization/config/localization_ph
 - `hard_obstacle`：人员、石块、农具、田埂等，需要进入局部安全链。
 - `negative_obstacle`：沟渠、坑洞，后续以独立可通行性层表达。
 
-Phase 4 新增 `rice_weeding_semantics` 无 ROS/Qt 数据工具和
-`docs/interfaces/rice_semantic_map_schema.md`。当前只定义 GeoJSON 文件合同、示例地图和静态校验，
-尚不发布 ROS topic。后续语义 server 才会把语义转换为 Marker、keepout mask 或其他 ROS 消息。
+Phase 4 新增 `rice_weeding_semantics` 无 Qt 数据工具和
+`docs/interfaces/rice_semantic_map_schema.md`。当前定义 GeoJSON 文件合同、示例地图、静态校验、
+离线 keepout mask 文件导出、只读 RViz Marker 预览和显式门禁保护的 simulation-only
+`OccupancyGrid` mask 发布；尚不接入 Nav2 costmap 或实车控制命令。后续语义 server 才会把语义转换为
+实车可用的在线 keepout mask 或其他 ROS 消息。
+当前纯数据 keepout mask 仅允许由 `hard_obstacle`、`negative_obstacle` 和 `keepout_zone`
+生成，不允许从 `crop_row` 或 `weed_patch` 生成。
+只读预览节点可发布 `/rice_weeding/semantics/markers`
+（`visualization_msgs/msg/MarkerArray`），供 RViz 查看语义层；它不得发布 keepout mask、TF 或速度。
+mask 发布器可发布 `/rice_weeding/semantics/keepout_mask`（`nav_msgs/msg/OccupancyGrid`），但必须
+显式携带 simulation-only 确认参数，不得启动 Nav2、TF、速度或实车控制。
